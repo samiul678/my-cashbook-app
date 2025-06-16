@@ -597,8 +597,8 @@
         // Google Drive API Configuration
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-        const API_KEY = 'AIzaSyChqgFTfcoAaqte53R9y4PecwLIqKJwx_0'; // Replace with your API key
-        const CLIENT_ID = '406157098174-63ma0jc4t8h45g6svrm3abhrag948omo.apps.googleusercontent.com'; // Replace with your client ID
+        const API_KEY = 'AIzaSyChqgFTfcoAaqte53R9y4PecwLIqKJwx_0';
+        const CLIENT_ID = '406157098174-63ma0jc4t8h45g6svrm3abhrag948omo.apps.googleusercontent.com';
         
         // Global variables
         let currentBookId = null;
@@ -628,7 +628,11 @@
             initializeApp();
             setupEventListeners();
             loadThemePreference();
-            initializeGoogleDrive();
+            
+            // Initialize Google APIs after DOM is loaded
+            setTimeout(() => {
+                initializeGoogleDrive();
+            }, 1000);
         });
 
         function initializeApp() {
@@ -692,76 +696,125 @@
 
         // Google Drive API Functions
         function initializeGoogleDrive() {
-            if (typeof gapi !== 'undefined') {
+            console.log('Initializing Google Drive APIs...');
+            
+            // Initialize GAPI client
+            if (typeof gapi !== 'undefined' && gapi.load) {
                 gapi.load('api:client', initializeGapiClient);
+            } else {
+                console.error('GAPI not loaded');
+                updateSyncStatus('error', 'API লোড হয়নি');
             }
             
             // Initialize Google Identity Services
-            if (typeof google !== 'undefined') {
-                google.accounts.id.initialize({
-                    client_id: CLIENT_ID,
-                    callback: handleCredentialResponse
-                });
-                gisInited = true;
-                maybeEnableButtons();
+            if (typeof google !== 'undefined' && google.accounts) {
+                try {
+                    // Initialize token client
+                    tokenClient = google.accounts.oauth2.initTokenClient({
+                        client_id: CLIENT_ID,
+                        scope: SCOPES,
+                        callback: handleTokenResponse,
+                    });
+                    gisInited = true;
+                    console.log('Google Identity Services initialized');
+                    maybeEnableButtons();
+                } catch (error) {
+                    console.error('Error initializing Google Identity Services:', error);
+                    updateSyncStatus('error', 'লগইন সিস্টেম ত্রুটি');
+                }
+            } else {
+                console.error('Google Identity Services not loaded');
+                updateSyncStatus('error', 'Google API লোড হয়নি');
             }
         }
 
         async function initializeGapiClient() {
             try {
+                console.log('Initializing GAPI client...');
                 await gapi.client.init({
-                    apiKey: AIzaSyChqgFTfcoAaqte53R9y4PecwLIqKJwx_0,
+                    apiKey: API_KEY,
                     discoveryDocs: [DISCOVERY_DOC],
                 });
                 gapiInited = true;
+                console.log('GAPI client initialized successfully');
                 maybeEnableButtons();
             } catch (error) {
                 console.error('Error initializing GAPI client:', error);
                 updateSyncStatus('error', 'সংযোগ ত্রুটি');
+                showToast('Google API ইনিশিয়ালাইজ করতে সমস্যা হয়েছে', 'error');
             }
         }
 
         function maybeEnableButtons() {
+            console.log('Checking API initialization status:', { gapiInited, gisInited });
+            
             if (gapiInited && gisInited) {
                 // Check if already authorized
                 const token = localStorage.getItem('google_access_token');
                 if (token) {
-                    gapi.client.setToken({ access_token: token });
-                    isAuthorized = true;
-                    updateSyncStatus('synced', 'সংযুক্ত');
-                    loadFromDrive();
+                    try {
+                        gapi.client.setToken({ access_token: token });
+                        isAuthorized = true;
+                        updateSyncStatus('synced', 'সংযুক্ত');
+                        console.log('Using stored access token');
+                        loadFromDrive();
+                    } catch (error) {
+                        console.error('Error setting stored token:', error);
+                        localStorage.removeItem('google_access_token');
+                        updateSyncStatus('offline', 'অফলাইন');
+                    }
                 } else {
                     updateSyncStatus('offline', 'অফলাইন');
                 }
+            } else {
+                updateSyncStatus('error', 'API লোড হয়নি');
             }
         }
 
         function handleAuthClick() {
-            if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID,
-                    scope: SCOPES,
-                    callback: (response) => {
-                        if (response.access_token) {
-                            localStorage.setItem('google_access_token', response.access_token);
-                            gapi.client.setToken(response);
-                            isAuthorized = true;
-                            closeModal('driveAuthModal');
-                            updateSyncStatus('synced', 'সংযুক্ত');
-                            showToast('Google Drive এর সাথে সংযুক্ত হয়েছে', 'success');
-                            syncToDrive();
-                        }
-                    },
-                });
-                tokenClient.requestAccessToken();
-            } else {
-                showToast('Google API লোড হয়নি', 'error');
+            console.log('Auth button clicked');
+            
+            if (!tokenClient) {
+                showToast('Google লগইন সিস্টেম প্রস্তুত নয়', 'error');
+                return;
+            }
+
+            try {
+                // Request access token
+                tokenClient.requestAccessToken({ prompt: 'consent' });
+            } catch (error) {
+                console.error('Error requesting access token:', error);
+                showToast('লগইন করতে সমস্যা হয়েছে', 'error');
             }
         }
 
-        function handleCredentialResponse(response) {
-            // Handle Google Sign-In response
-            console.log("Encoded JWT ID token: " + response.credential);
+        function handleTokenResponse(response) {
+            console.log('Token response received:', response);
+            
+            if (response.error) {
+                console.error('Auth error:', response.error);
+                showToast('Google লগইন ব্যর্থ হয়েছে', 'error');
+                return;
+            }
+
+            if (response.access_token) {
+                try {
+                    localStorage.setItem('google_access_token', response.access_token);
+                    gapi.client.setToken(response);
+                    isAuthorized = true;
+                    closeModal('driveAuthModal');
+                    updateSyncStatus('synced', 'সংযুক্ত');
+                    showToast('Google Drive এর সাথে সংযুক্ত হয়েছে', 'success');
+                    
+                    // Initial sync
+                    setTimeout(() => {
+                        syncToDrive();
+                    }, 1000);
+                } catch (error) {
+                    console.error('Error handling token response:', error);
+                    showToast('টোকেন সংরক্ষণে সমস্যা হয়েছে', 'error');
+                }
+            }
         }
 
         async function handleSync() {
@@ -779,64 +832,84 @@
             } catch (error) {
                 console.error('Sync error:', error);
                 updateSyncStatus('error', 'সিঙ্ক ত্রুটি');
-                showToast('সিঙ্ক করতে সমস্যা হয়েছে', 'error');
+                showToast('সিঙ্ক করতে সমস্যা হয়েছে: ' + error.message, 'error');
             }
         }
 
         async function syncToDrive() {
-            if (!isAuthorized) return;
+            if (!isAuthorized) {
+                console.log('Not authorized for sync');
+                return;
+            }
             
-            const data = {
-                books: books,
-                entries: entries,
-                currentBookId: currentBookId,
-                lastSync: new Date().toISOString()
-            };
+            console.log('Starting sync to Drive...');
             
-            const boundary = '-------314159265358979323846';
-            const delimiter = "\r\n--" + boundary + "\r\n";
-            const close_delim = "\r\n--" + boundary + "--";
-            
-            const metadata = {
-                'name': 'cashbook-data.json',
-                'parents': ['appDataFolder']
-            };
-            
-            const multipartRequestBody =
-                delimiter +
-                'Content-Type: application/json\r\n\r\n' +
-                JSON.stringify(metadata) +
-                delimiter +
-                'Content-Type: application/json\r\n\r\n' +
-                JSON.stringify(data) +
-                close_delim;
-            
-            const request = gapi.client.request({
-                'path': driveFileId ? `/upload/drive/v3/files/${driveFileId}` : '/upload/drive/v3/files',
-                'method': driveFileId ? 'PATCH' : 'POST',
-                'params': {'uploadType': 'multipart'},
-                'headers': {
-                    'Content-Type': 'multipart/related; boundary="' + boundary + '"'
-                },
-                'body': multipartRequestBody
-            });
-            
-            const response = await request;
-            if (response.result && response.result.id) {
-                driveFileId = response.result.id;
-                localStorage.setItem('drive_file_id', driveFileId);
+            try {
+                const data = {
+                    books: books,
+                    entries: entries,
+                    currentBookId: currentBookId,
+                    lastSync: new Date().toISOString()
+                };
+                
+                const boundary = '-------314159265358979323846';
+                const delimiter = "\r\n--" + boundary + "\r\n";
+                const close_delim = "\r\n--" + boundary + "--";
+                
+                const metadata = {
+                    'name': 'cashbook-data.json',
+                    'parents': ['appDataFolder']
+                };
+                
+                const multipartRequestBody =
+                    delimiter +
+                    'Content-Type: application/json\r\n\r\n' +
+                    JSON.stringify(metadata) +
+                    delimiter +
+                    'Content-Type: application/json\r\n\r\n' +
+                    JSON.stringify(data) +
+                    close_delim;
+                
+                const request = gapi.client.request({
+                    'path': driveFileId ? `/upload/drive/v3/files/${driveFileId}` : '/upload/drive/v3/files',
+                    'method': driveFileId ? 'PATCH' : 'POST',
+                    'params': {'uploadType': 'multipart'},
+                    'headers': {
+                        'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+                    },
+                    'body': multipartRequestBody
+                });
+                
+                const response = await request;
+                console.log('Sync response:', response);
+                
+                if (response.result && response.result.id) {
+                    driveFileId = response.result.id;
+                    localStorage.setItem('drive_file_id', driveFileId);
+                    console.log('File synced successfully with ID:', driveFileId);
+                }
+            } catch (error) {
+                console.error('Error syncing to Drive:', error);
+                throw error;
             }
         }
 
         async function loadFromDrive() {
-            if (!isAuthorized) return;
+            if (!isAuthorized) {
+                console.log('Not authorized for loading from Drive');
+                return;
+            }
             
             try {
+                console.log('Loading from Drive...');
+                
                 // First, find the file
                 const searchResponse = await gapi.client.drive.files.list({
                     q: "name='cashbook-data.json' and parents in 'appDataFolder'",
                     spaces: 'appDataFolder'
                 });
+                
+                console.log('Search response:', searchResponse);
                 
                 if (searchResponse.result.files.length > 0) {
                     driveFileId = searchResponse.result.files[0].id;
@@ -847,6 +920,8 @@
                         fileId: driveFileId,
                         alt: 'media'
                     });
+                    
+                    console.log('File response:', fileResponse);
                     
                     if (fileResponse.body) {
                         const data = JSON.parse(fileResponse.body);
@@ -865,11 +940,13 @@
                             renderEntries();
                             
                             showToast('ক্লাউড থেকে ডাটা রিস্টোর হয়েছে', 'success');
+                            console.log('Data loaded from cloud successfully');
                         }
                     }
                 }
             } catch (error) {
                 console.error('Error loading from Drive:', error);
+                // Don't show error to user as this might be first time
             }
         }
 
