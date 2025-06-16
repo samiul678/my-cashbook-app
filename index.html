@@ -30,7 +30,7 @@
       <div class="flex gap-2">
         <select id="bookSelector" class="flex-1 p-2 border rounded"></select>
         <input id="newBookName" placeholder="New Book Name" class="p-2 border rounded">
-        <button onclick="createBook()" class="bg-blue-500 text-white px-4 py-2 rounded">Add</button>
+        <button id="createBookBtn" class="bg-blue-500 text-white px-4 py-2 rounded">Add</button>
       </div>
     </div>
 
@@ -46,7 +46,7 @@
         <input id="entryAmount" type="number" placeholder="Amount" class="p-2 border rounded">
         <input id="entryCategory" type="text" placeholder="Category" class="p-2 border rounded">
         <input id="entryNote" type="text" placeholder="Note" class="p-2 border rounded">
-        <button onclick="addEntry()" class="bg-green-600 text-white px-4 py-2 rounded">Add</button>
+        <button id="addEntryBtn" class="bg-green-600 text-white px-4 py-2 rounded">Add</button>
       </div>
     </div>
 
@@ -58,27 +58,26 @@
         <label class="font-semibold">To:</label>
         <input id="filterEndDate" type="date" class="p-2 border rounded">
         <input id="filterSearch" placeholder="Search note/category" class="p-2 border rounded">
-        <button onclick="renderEntries()" class="bg-blue-500 text-white px-3 py-1 rounded">Filter</button>
+        <button id="filterBtn" class="bg-blue-500 text-white px-3 py-1 rounded">Filter</button>
       </div>
       <div class="flex gap-2">
-        <button onclick="downloadData()" class="bg-purple-600 text-white px-4 py-2 rounded">Download</button>
-        <button onclick="backupToDrive()" class="bg-yellow-500 text-white px-4 py-2 rounded">Backup</button>
-        <button onclick="restoreFromDrive()" class="bg-orange-500 text-white px-4 py-2 rounded">Restore</button>
+        <button id="downloadBtn" class="bg-purple-600 text-white px-4 py-2 rounded">Download</button>
+        <button id="backupBtn" class="bg-yellow-500 text-white px-4 py-2 rounded">Backup</button>
+        <button id="restoreBtn" class="bg-orange-500 text-white px-4 py-2 rounded">Restore</button>
       </div>
     </div>
 
-    
+    <!-- Google Auth Buttons -->
     <div class="my-4">
-      <button onclick="handleAuthClick()" class="bg-blue-700 text-white px-4 py-2 rounded">
+      <button id="signInBtn" class="bg-blue-700 text-white px-4 py-2 rounded">
         Sign in with Google
       </button>
-      <button onclick="handleSignoutClick()" class="bg-gray-600 text-white px-4 py-2 rounded ml-2">
+      <button id="signOutBtn" class="bg-gray-600 text-white px-4 py-2 rounded ml-2">
         Sign out
       </button>
     </div>
 
-
-<!-- Entry Table -->
+    <!-- Entry Table -->
     <div class="bg-white p-4 rounded shadow">
       <h2 class="text-xl font-semibold mb-2">Entries</h2>
       <table class="w-full table-auto text-sm">
@@ -99,11 +98,22 @@
   </div>
 
   <script>
-
     const CLIENT_ID = '406157098174-63ma0jc4t8h45g6svrm3abhrag948omo.apps.googleusercontent.com';
     const SCOPES = 'https://www.googleapis.com/auth/drive.file';
     let books = JSON.parse(localStorage.getItem('books')) || {};
     let currentBook = null;
+    let tokenClient;
+    let gapiInited = false;
+    let gisInited = false;
+
+    // Initialize books if empty
+    if (Object.keys(books).length === 0) {
+      books = {
+        'Default Book': []
+      };
+      currentBook = 'Default Book';
+      localStorage.setItem('books', JSON.stringify(books));
+    }
 
     function loadBooks() {
       const bookSelector = document.getElementById('bookSelector');
@@ -114,21 +124,22 @@
         opt.textContent = book;
         bookSelector.appendChild(opt);
       });
+      
       if (!currentBook && Object.keys(books).length > 0) {
         currentBook = Object.keys(books)[0];
         bookSelector.value = currentBook;
-        renderEntries();
       }
+      renderEntries();
     }
 
-    function createBook() {
+    async function createBook() {
       const name = document.getElementById('newBookName').value.trim();
       if (name && !books[name]) {
         books[name] = [];
         currentBook = name;
+        document.getElementById('newBookName').value = '';
         await saveAndSync();
         loadBooks();
-        renderEntries();
       }
     }
 
@@ -136,19 +147,41 @@
       localStorage.setItem('books', JSON.stringify(books));
     }
 
-    function addEntry() {
+    async function addEntry() {
       const date = document.getElementById('entryDate').value;
       const type = document.getElementById('entryType').value;
       const amount = parseFloat(document.getElementById('entryAmount').value);
       const note = document.getElementById('entryNote').value;
       const category = document.getElementById('entryCategory').value;
-      if (!date || !type || isNaN(amount)) return;
-      books[currentBook].push({ date, type, amount, note, category });
+      
+      if (!date || !type || isNaN(amount)) {
+        alert('Please fill in all required fields (Date, Type, Amount)');
+        return;
+      }
+
+      if (!currentBook) {
+        alert('Please select or create a book first');
+        return;
+      }
+
+      books[currentBook].push({ 
+        date, 
+        type, 
+        amount, 
+        note: note || '', 
+        category: category || '' 
+      });
+
+      // Clear form
+      document.getElementById('entryAmount').value = '';
+      document.getElementById('entryNote').value = '';
+      document.getElementById('entryCategory').value = '';
+      
       await saveAndSync();
       renderEntries();
     }
 
-    function editEntry(index) {
+    async function editEntry(index) {
       const entry = books[currentBook][index];
       document.getElementById('entryDate').value = entry.date;
       document.getElementById('entryType').value = entry.type;
@@ -171,17 +204,25 @@
       const endDate = document.getElementById('filterEndDate').value;
       const search = document.getElementById('filterSearch').value.toLowerCase();
       table.innerHTML = '';
+      
       let balance = 0, income = 0, expense = 0, count = 0;
+
+      if (!currentBook || !books[currentBook]) {
+        updateSummary(income, expense, balance, count);
+        return;
+      }
 
       books[currentBook].forEach((entry, index) => {
         if ((startDate && entry.date < startDate) || (endDate && entry.date > endDate)) return;
         if (search && !(entry.note?.toLowerCase().includes(search) || entry.category?.toLowerCase().includes(search))) return;
+        
         const tr = document.createElement('tr');
+        tr.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
         tr.innerHTML = `
           <td class="p-2">${entry.date}</td>
           <td class="p-2">${getDayOfWeek(entry.date)}</td>
           <td class="p-2 capitalize">${entry.type}</td>
-          <td class="p-2">${entry.amount}</td>
+          <td class="p-2">${entry.amount.toFixed(2)}</td>
           <td class="p-2">${entry.category || ''}</td>
           <td class="p-2">${entry.note}</td>
           <td class="p-2">
@@ -193,20 +234,31 @@
         if (entry.type === 'income') income += entry.amount;
         else expense += entry.amount;
       });
+      
       balance = income - expense;
-      document.getElementById('summaryIncome').textContent = income;
-      document.getElementById('summaryExpense').textContent = expense;
-      document.getElementById('summaryBalance').textContent = balance;
+      updateSummary(income, expense, balance, count);
+    }
+
+    function updateSummary(income, expense, balance, count) {
+      document.getElementById('summaryIncome').textContent = income.toFixed(2);
+      document.getElementById('summaryExpense').textContent = expense.toFixed(2);
+      document.getElementById('summaryBalance').textContent = balance.toFixed(2);
       document.getElementById('summaryCount').textContent = count;
     }
 
     function downloadData() {
+      if (!currentBook || !books[currentBook] || books[currentBook].length === 0) {
+        alert('No data to download');
+        return;
+      }
+
       const data = books[currentBook];
       const csv = ["Date,Day,Type,Amount,Category,Note"];
       data.forEach(entry => {
         const day = getDayOfWeek(entry.date);
-        csv.push(`${entry.date},${day},${entry.type},${entry.amount},${entry.category || ''},${entry.note}`);
+        csv.push(`${entry.date},${day},${entry.type},${entry.amount.toFixed(2)},${entry.category || ''},${entry.note}`);
       });
+      
       const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -215,59 +267,80 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     async function backupToDrive() {
-      const content = JSON.stringify(books[currentBook], null, 2);
-      const file = new Blob([content], { type: 'application/json' });
-      const metadata = {
-        name: `${currentBook}_backup.json`,
-        mimeType: 'application/json'
-      };
-      const accessToken = gapi.auth.getToken().access_token;
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-      form.append('file', file);
+      if (!gapi.client.getToken()) {
+        alert('Please sign in first');
+        return;
+      }
+
+      if (!currentBook || !books[currentBook] || books[currentBook].length === 0) {
+        alert('No data to backup');
+        return;
+      }
+
       try {
+        const content = JSON.stringify(books[currentBook], null, 2);
+        const file = new Blob([content], { type: 'application/json' });
+        const metadata = {
+          name: `${currentBook}_backup_${new Date().toISOString().split('T')[0]}.json`,
+          mimeType: 'application/json'
+        };
+
+        const accessToken = gapi.client.getToken().access_token;
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', file);
+
         const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
           method: 'POST',
           headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
           body: form,
         });
+
         const result = await response.json();
-        alert('✅ Backup successful! File ID: ' + result.id);
+        alert('✅ Backup successful! File saved to Google Drive.');
       } catch (error) {
         console.error('Backup failed', error);
-        alert('❌ Backup failed.');
+        alert('❌ Backup failed. Please check console for details.');
       }
     }
 
     async function restoreFromDrive() {
-      const accessToken = gapi.auth.getToken().access_token;
+      if (!gapi.client.getToken()) {
+        alert('Please sign in first');
+        return;
+      }
+
       try {
-        const response = await fetch('https://www.googleapis.com/drive/v3/files?q=name contains \'_backup.json\'&fields=files(id,name)&spaces=drive', {
+        const accessToken = gapi.client.getToken().access_token;
+        const response = await fetch('https://www.googleapis.com/drive/v3/files?q=name contains \'_backup.json\'&orderBy=createdTime desc&fields=files(id,name)&spaces=drive', {
           headers: new Headers({ 'Authorization': 'Bearer ' + accessToken })
         });
+
         const data = await response.json();
-        if (!data.files.length) return alert('No backup files found.');
+        if (!data.files || data.files.length === 0) {
+          return alert('No backup files found in your Google Drive.');
+        }
+
+        // Get the most recent backup
         const fileId = data.files[0].id;
         const contentRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
           headers: new Headers({ 'Authorization': 'Bearer ' + accessToken })
         });
+
         const json = await contentRes.json();
         books[currentBook] = json;
         await saveAndSync();
         renderEntries();
-        alert('✅ Restore complete.');
+        alert('✅ Restore complete. Data loaded from Google Drive.');
       } catch (error) {
         console.error('Restore failed', error);
-        alert('❌ Restore failed.');
+        alert('❌ Restore failed. Please check console for details.');
       }
     }
-
-    let tokenClient;
-    let gapiInited = false;
-    let gisInited = false;
 
     function gapiLoaded() {
       gapi.load('client', initializeGapiClient);
@@ -279,61 +352,115 @@
         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
       });
       gapiInited = true;
+      maybeEnableButtons();
     }
 
     function gisLoaded() {
       tokenClient = google.accounts.oauth2.initTokenClient({
         client_id: CLIENT_ID,
         scope: SCOPES,
-        callback: '', // will be set later
+        callback: '', // Will be set in handleAuthClick
       });
       gisInited = true;
+      maybeEnableButtons();
+    }
+
+    function maybeEnableButtons() {
+      if (gapiInited && gisInited) {
+        document.getElementById('signInBtn').disabled = false;
+      }
     }
 
     function handleAuthClick() {
       tokenClient.callback = async (resp) => {
-        if (resp.error) throw resp;
-        alert('Login successful!');
+        if (resp.error !== undefined) {
+          throw resp;
+        }
+        document.getElementById('signInBtn').hidden = true;
+        document.getElementById('signOutBtn').hidden = false;
+        document.getElementById('backupBtn').disabled = false;
+        document.getElementById('restoreBtn').disabled = false;
       };
-      tokenClient.requestAccessToken({ prompt: 'consent' });
+
+      if (gapi.client.getToken() === null) {
+        tokenClient.requestAccessToken({ prompt: 'consent' });
+      } else {
+        tokenClient.requestAccessToken({ prompt: '' });
+      }
     }
 
     function handleSignoutClick() {
       const token = gapi.client.getToken();
       if (token !== null) {
         google.accounts.oauth2.revoke(token.access_token);
-        gapi.client.setToken('');
-        alert('Logged out.');
+        gapi.client.setToken(null);
+        document.getElementById('signInBtn').hidden = false;
+        document.getElementById('signOutBtn').hidden = true;
+        document.getElementById('backupBtn').disabled = true;
+        document.getElementById('restoreBtn').disabled = true;
       }
     }
 
-    
     async function autoSync() {
       if (gapi.client.getToken()) {
-        await restoreFromDrive();
+        try {
+          await restoreFromDrive();
+        } catch (error) {
+          console.log('Auto sync failed, using local data', error);
+        }
       }
     }
 
     async function saveAndSync() {
       saveBooks();
       if (gapi.client.getToken()) {
-        await backupToDrive();
+        try {
+          await backupToDrive();
+        } catch (error) {
+          console.log('Background sync failed', error);
+        }
       }
     }
 
+    // Set today's date as default
+    function setDefaultDate() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('entryDate').value = today;
+    }
 
-    document.getElementById('bookSelector').addEventListener('change', function () {
-      currentBook = this.value;
-      renderEntries();
-    });
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', () => {
+      // Set button event listeners
+      document.getElementById('createBookBtn').addEventListener('click', createBook);
+      document.getElementById('addEntryBtn').addEventListener('click', addEntry);
+      document.getElementById('filterBtn').addEventListener('click', renderEntries);
+      document.getElementById('downloadBtn').addEventListener('click', downloadData);
+      document.getElementById('backupBtn').addEventListener('click', backupToDrive);
+      document.getElementById('restoreBtn').addEventListener('click', restoreFromDrive);
+      document.getElementById('signInBtn').addEventListener('click', handleAuthClick);
+      document.getElementById('signOutBtn').addEventListener('click', handleSignoutClick);
 
-    window.onload = async () => {
-      await autoSync();
+      // Book selector change event
+      document.getElementById('bookSelector').addEventListener('change', function() {
+        currentBook = this.value;
+        renderEntries();
+      });
+
+      // Initialize
+      setDefaultDate();
+      loadBooks();
       gapiLoaded();
       gisLoaded();
-      loadBooks();
-    };
 
-</script>
+      // Disable buttons until APIs are loaded
+      document.getElementById('signInBtn').disabled = true;
+      document.getElementById('backupBtn').disabled = true;
+      document.getElementById('restoreBtn').disabled = true;
+      document.getElementById('signOutBtn').hidden = true;
+    });
+
+    // Make functions available globally for inline event handlers
+    window.editEntry = editEntry;
+  </script>
 </body>
 </html>
