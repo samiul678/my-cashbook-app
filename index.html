@@ -896,7 +896,7 @@
             } catch (error) {
                 console.error('Sync error:', error);
                 updateSyncStatus('error', 'সিঙ্ক ত্রুটি');
-                showToast('সিঙ্ক করতে সমস্যা হয়েছে: ' + error.message, 'error');
+                showToast('সিঙ্ক করতে সমস্যা হয়েছে: ' + (error.message || error.result?.error?.message || 'অজানা ত্রুটি'), 'error');
             }
         }
 
