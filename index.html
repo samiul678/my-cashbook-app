@@ -67,7 +67,18 @@
       </div>
     </div>
 
-    <!-- Entry Table -->
+    
+    <div class="my-4">
+      <button onclick="handleAuthClick()" class="bg-blue-700 text-white px-4 py-2 rounded">
+        Sign in with Google
+      </button>
+      <button onclick="handleSignoutClick()" class="bg-gray-600 text-white px-4 py-2 rounded ml-2">
+        Sign out
+      </button>
+    </div>
+
+
+<!-- Entry Table -->
     <div class="bg-white p-4 rounded shadow">
       <h2 class="text-xl font-semibold mb-2">Entries</h2>
       <table class="w-full table-auto text-sm">
@@ -264,7 +275,7 @@
 
     async function initializeGapiClient() {
       await gapi.client.init({
-        apiKey: '',
+        apiKey: 'AIzaSyChqgFTfcoAaqte53R9y4PecwLIqKJwx_0',
         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
       });
       gapiInited = true;
