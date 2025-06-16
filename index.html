@@ -694,6 +694,47 @@
             document.getElementById('entryDate').valueAsDate = new Date();
         }
 
+        // Safe localStorage operations
+        function safeGetLocalStorage(key, defaultValue = null) {
+            try {
+                const item = localStorage.getItem(key);
+                return item ? JSON.parse(item) : defaultValue;
+            } catch (error) {
+                console.error(`Error reading from localStorage (${key}):`, error);
+                return defaultValue;
+            }
+        }
+
+        function safeSetLocalStorage(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+                return true;
+            } catch (error) {
+                console.error(`Error writing to localStorage (${key}):`, error);
+                showToast('স্থানীয় স্টোরেজে সমস্যা হয়েছে', 'warning');
+                return false;
+            }
+        }
+
+        function safeGetStringFromLocalStorage(key, defaultValue = null) {
+            try {
+                return localStorage.getItem(key) || defaultValue;
+            } catch (error) {
+                console.error(`Error reading string from localStorage (${key}):`, error);
+                return defaultValue;
+            }
+        }
+
+        function safeSetStringToLocalStorage(key, value) {
+            try {
+                localStorage.setItem(key, value);
+                return true;
+            } catch (error) {
+                console.error(`Error writing string to localStorage (${key}):`, error);
+                return false;
+            }
+        }
+
         // Google Drive API Functions
         function initializeGoogleDrive() {
             console.log('Initializing Google Drive APIs...');
@@ -707,7 +748,7 @@
             }
             
             // Initialize Google Identity Services
-            if (typeof google !== 'undefined' && google.accounts) {
+            if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
                 try {
                     // Initialize token client
                     tokenClient = google.accounts.oauth2.initTokenClient({
@@ -750,7 +791,7 @@
             
             if (gapiInited && gisInited) {
                 // Check if already authorized
-                const token = localStorage.getItem('google_access_token');
+                const token = safeGetStringFromLocalStorage('google_access_token');
                 if (token) {
                     try {
                         gapi.client.setToken({ access_token: token });
@@ -760,7 +801,7 @@
                         loadFromDrive();
                     } catch (error) {
                         console.error('Error setting stored token:', error);
-                        localStorage.removeItem('google_access_token');
+                        safeSetStringToLocalStorage('google_access_token', null);
                         updateSyncStatus('offline', 'অফলাইন');
                     }
                 } else {
@@ -799,7 +840,13 @@
 
             if (response.access_token) {
                 try {
-                    localStorage.setItem('google_access_token', response.access_token);
+                    // Try to save token with error handling
+                    const tokenSaved = safeSetStringToLocalStorage('google_access_token', response.access_token);
+                    
+                    if (!tokenSaved) {
+                        showToast('টোকেন সংরক্ষণে স্থানীয় সমস্যা, তবে সেশনে কাজ করবে', 'warning');
+                    }
+                    
                     gapi.client.setToken(response);
                     isAuthorized = true;
                     closeModal('driveAuthModal');
@@ -812,7 +859,19 @@
                     }, 1000);
                 } catch (error) {
                     console.error('Error handling token response:', error);
-                    showToast('টোকেন সংরক্ষণে সমস্যা হয়েছে', 'error');
+                    showToast('টোকেন প্রক্রিয়াকরণে সমস্যা হয়েছে', 'error');
+                    
+                    // Try to continue with temporary authorization
+                    try {
+                        gapi.client.setToken(response);
+                        isAuthorized = true;
+                        closeModal('driveAuthModal');
+                        updateSyncStatus('synced', 'সংযুক্ত (অস্থায়ী)');
+                        showToast('Google Drive এর সাথে অস্থায়ী সংযোগ স্থাপিত', 'info');
+                    } catch (secondaryError) {
+                        console.error('Secondary error in token handling:', secondaryError);
+                        showToast('টোকেন ব্যবহার করতে সম্পূর্ণ ব্যর্থ', 'error');
+                    }
                 }
             }
         }
@@ -885,7 +944,7 @@
                 
                 if (response.result && response.result.id) {
                     driveFileId = response.result.id;
-                    localStorage.setItem('drive_file_id', driveFileId);
+                    safeSetStringToLocalStorage('drive_file_id', driveFileId);
                     console.log('File synced successfully with ID:', driveFileId);
                 }
             } catch (error) {
@@ -913,7 +972,7 @@
                 
                 if (searchResponse.result.files.length > 0) {
                     driveFileId = searchResponse.result.files[0].id;
-                    localStorage.setItem('drive_file_id', driveFileId);
+                    safeSetStringToLocalStorage('drive_file_id', driveFileId);
                     
                     // Download the file
                     const fileResponse = await gapi.client.drive.files.get({
@@ -927,13 +986,13 @@
                         const data = JSON.parse(fileResponse.body);
                         
                         // Check if cloud data is newer
-                        const localLastSync = localStorage.getItem('last_sync');
+                        const localLastSync = safeGetStringFromLocalStorage('last_sync');
                         if (!localLastSync || new Date(data.lastSync) > new Date(localLastSync)) {
                             books = data.books || [];
                             entries = data.entries || [];
                             currentBookId = data.currentBookId || null;
                             
-                            localStorage.setItem('last_sync', data.lastSync);
+                            safeSetStringToLocalStorage('last_sync', data.lastSync);
                             saveUserData();
                             updateBookSelector();
                             updateSummary();
@@ -968,12 +1027,11 @@
         }
 
         function loadUserData() {
-            const userData = localStorage.getItem('cashbook_data');
+            const userData = safeGetLocalStorage('cashbook_data');
             if (userData) {
-                const data = JSON.parse(userData);
-                books = data.books || [];
-                entries = data.entries || [];
-                currentBookId = data.currentBookId || null;
+                books = userData.books || [];
+                entries = userData.entries || [];
+                currentBookId = userData.currentBookId || null;
             } else {
                 // Create default book
                 books = [{ id: Date.now().toString(), name: 'ব্যক্তিগত বই', createdAt: new Date().toISOString() }];
@@ -996,10 +1054,11 @@
                 entries: entries,
                 currentBookId: currentBookId
             };
-            localStorage.setItem('cashbook_data', JSON.stringify(data));
+            
+            const saved = safeSetLocalStorage('cashbook_data', data);
             
             // Auto-sync to Drive if authorized
-            if (isAuthorized) {
+            if (isAuthorized && saved) {
                 syncToDrive().catch(console.error);
             }
         }
@@ -1536,7 +1595,7 @@
 
         // Theme management
         function loadThemePreference() {
-            const savedTheme = localStorage.getItem('cashbook_theme') || 'light';
+            const savedTheme = safeGetStringFromLocalStorage('cashbook_theme') || 'light';
             if (savedTheme === 'dark') {
                 document.documentElement.classList.add('dark');
             }
@@ -1545,7 +1604,7 @@
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
             const isDark = document.documentElement.classList.contains('dark');
-            localStorage.setItem('cashbook_theme', isDark ? 'dark' : 'light');
+            safeSetStringToLocalStorage('cashbook_theme', isDark ? 'dark' : 'light');
             showToast(`${isDark ? 'ডার্ক' : 'লাইট'} থিম চালু করা হয়েছে`, 'info');
         }
 
