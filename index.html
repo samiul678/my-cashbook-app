@@ -741,7 +741,7 @@
             
             // Initialize GAPI client
             if (typeof gapi !== 'undefined' && gapi.load) {
-                gapi.load('api:client', initializeGapiClient);
+                gapi.load('client', initializeGapiClient);
             } else {
                 console.error('GAPI not loaded');
                 updateSyncStatus('error', 'API লোড হয়নি');
