@@ -846,6 +846,11 @@
                     if (!tokenSaved) {
                         showToast('টোকেন সংরক্ষণে স্থানীয় সমস্যা, তবে সেশনে কাজ করবে', 'warning');
                     }
+
+                    if (!gapi || !gapi.client) {
+  showToast('Google API এখনও লোড হয়নি', 'error');
+  return;
+}
                     
                     gapi.client.setToken(response);
                     isAuthorized = true;
@@ -1319,7 +1324,7 @@
         function renderEntries() {
             const bookEntries = getCurrentBookEntries();
             const filteredEntries = applyCurrentFilters(bookEntries);
-            const sortedEntries = sortEntries(filteredEntries, sortColumn, sortDirection);
+            const sortedEntries = sortEntriesList(filteredEntries, sortColumn, sortDirection);র
             
             const tbody = document.getElementById('entriesTableBody');
             tbody.innerHTML = '';
@@ -1418,7 +1423,7 @@
             applyFilters();
         }
 
-        function sortEntries(entries, column, direction) {
+        function sortEntriesList(entries, column, direction) {
             return [...entries].sort((a, b) => {
                 let aVal = a[column];
                 let bVal = b[column];
