@@ -15,6 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
     <style>
         * {
@@ -191,6 +192,12 @@
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <div id="loginSection" class="p-6 max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg mt-10">
+  <h2 class="text-lg font-semibold mb-4 text-center text-gray-800 dark:text-white">লগইন করুন</h2>
+  <input type="email" id="email" placeholder="ইমেইল" class="w-full mb-3 px-4 py-2 border rounded dark:bg-gray-700 dark:text-white" />
+  <input type="password" id="password" placeholder="পাসওয়ার্ড" class="w-full mb-3 px-4 py-2 border rounded dark:bg-gray-700 dark:text-white" />
+  <button onclick="loginUser()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded">লগইন</button>
+</div>
     <!-- Loading Screen -->
     <div id="loadingScreen" class="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex items-center justify-center">
         <div class="text-center">
@@ -1393,6 +1400,38 @@
                 saveUserData();
             }
         }, 30000); // Auto-save every 30 seconds
+
+// ইউজার লগইন ফাংশন
+function loginUser() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      alert("লগইন সফল! UID: " + user.uid);
+      console.log("User UID:", user.uid);
+      document.getElementById("loginSection").style.display = "none";
+      document.getElementById("appContainer").classList.remove('hidden');
+    })
+    .catch((error) => {
+      alert("লগইন ব্যর্থ: " + error.message);
+    });
+}
+
+// ইউজার লগইন থাকলে সরাসরি অ্যাপ দেখাও
+firebase.auth().onAuthStateChanged((user) => {
+  if (user) {
+    console.log("লগইন ইউজার:", user.uid);
+    document.getElementById("loginSection").style.display = "none";
+    document.getElementById("appContainer").classList.remove('hidden');
+  } else {
+    document.getElementById("loginSection").style.display = "block";
+    document.getElementById("appContainer").classList.add('hidden');
+  }
+});
+
+        
     </script>
 </body>
 </html>
