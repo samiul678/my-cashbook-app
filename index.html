@@ -614,7 +614,7 @@
         function initializeFirebase() {
             try {
                 app = firebase.initializeApp(firebaseConfig);
-                db = firebase.database(); // ✅ বাইরের global db ভেরিয়েবল ব্যবহার করুন
+                db = firebase.database(); // ✅ বাইরের global db ভেরিয়েবল ব্যবহার করুন
                 analytics = firebase.analytics(app);
                 console.log('Firebase initialized successfully');
                 updateSyncStatus('synced', 'Firebase সংযুক্ত');
@@ -780,6 +780,7 @@
     } else {
         console.warn("⚠️ ইউজার লগইন নেই, Firebase-এ সেভ হবে না");
     }
+}
 
         function updateBookSelector() {
             const selector = document.getElementById('currentBook');
