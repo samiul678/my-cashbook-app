@@ -614,6 +614,7 @@
         function initializeFirebase() {
             try {
                 app = firebase.initializeApp(firebaseConfig);
+                const db = firebase.database(); // ✅ এটা Firebase ডাটাবেজের রেফারেন্স
                 analytics = firebase.analytics(app);
                 console.log('Firebase initialized successfully');
                 updateSyncStatus('synced', 'Firebase সংযুক্ত');
@@ -755,15 +756,30 @@
         }
 
         function saveUserData() {
-            const data = {
-                books: books,
-                entries: entries,
-                currentBookId: currentBookId
-            };
-            
-            safeSetLocalStorage('cashbook_data', data);
-            updateSyncStatus('synced', 'স্থানীয় সংরক্ষিত');
-        }
+    const data = {
+        books: books,
+        entries: entries,
+        currentBookId: currentBookId
+    };
+
+    safeSetLocalStorage('cashbook_data', data);
+    updateSyncStatus('synced', 'স্থানীয় সংরক্ষিত');
+
+    // ✅ Firebase এ পাঠানো শুরু
+    const user = firebase.auth().currentUser;
+    if (user) {
+        const uid = user.uid;
+        db.ref('users/' + uid + '/cashbook').set(data)
+        .then(() => {
+            updateSyncStatus('synced', 'Firebase এ সংরক্ষিত');
+        })
+        .catch((error) => {
+            console.error("❌ Firebase এ সমস্যা:", error);
+            updateSyncStatus('error', 'Firebase সেভ ব্যর্থ');
+        });
+    } else {
+        console.warn("⚠️ ইউজার লগইন নেই, Firebase-এ সেভ হবে না");
+    }
 
         function updateBookSelector() {
             const selector = document.getElementById('currentBook');
