@@ -16,7 +16,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
     <style>
         * {
@@ -190,20 +190,195 @@
                 display: none !important;
             }
         }
+
+        .login-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            margin: 1rem;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #718096;
+        }
+
+        .auth-toggle button {
+            color: #667eea;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-    <div id="loginSection" class="p-6 max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg mt-10">
-  <h2 class="text-lg font-semibold mb-4 text-center text-gray-800 dark:text-white">লগইন করুন</h2>
-  <input type="email" id="email" placeholder="ইমেইল" class="w-full mb-3 px-4 py-2 border rounded dark:bg-gray-700 dark:text-white" />
-  <input type="password" id="password" placeholder="পাসওয়ার্ড" class="w-full mb-3 px-4 py-2 border rounded dark:bg-gray-700 dark:text-white" />
-  <button onclick="loginUser()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded">লগইন</button>
-</div>
+    <!-- Login Section -->
+    <div id="loginSection" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>💰 আমার ক্যাশবুক</h1>
+                <p>আপনার আর্থিক হিসাব রাখুন</p>
+            </div>
+
+            <div id="errorMessage" class="error-message hidden"></div>
+            <div id="successMessage" class="success-message hidden"></div>
+
+            <!-- Login Form -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">ইমেইল</label>
+                    <input type="email" id="email" class="form-input" placeholder="আপনার ইমেইল লিখুন" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">পাসওয়ার্ড</label>
+                    <input type="password" id="password" class="form-input" placeholder="পাসওয়ার্ড লিখুন" required>
+                </div>
+                
+                <button type="submit" id="loginBtn" class="btn-primary">
+                    <span id="loginBtnText">লগইন করুন</span>
+                    <div id="loginSpinner" class="loading-spinner hidden"></div>
+                </button>
+            </form>
+
+            <div class="auth-toggle">
+                <p>নতুন অ্যাকাউন্ট? <button type="button" id="showRegister">রেজিস্টার করুন</button></p>
+            </div>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="hidden">
+                <div class="form-group">
+                    <label for="regEmail">ইমেইল</label>
+                    <input type="email" id="regEmail" class="form-input" placeholder="আপনার ইমেইল লিখুন" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regPassword">পাসওয়ার্ড</label>
+                    <input type="password" id="regPassword" class="form-input" placeholder="পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)" required minlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">পাসওয়ার্ড নিশ্চিত করুন</label>
+                    <input type="password" id="confirmPassword" class="form-input" placeholder="পাসওয়ার্ড আবার লিখুন" required>
+                </div>
+                
+                <button type="submit" id="registerBtn" class="btn-primary">
+                    <span id="registerBtnText">অ্যাকাউন্ট তৈরি করুন</span>
+                    <div id="registerSpinner" class="loading-spinner hidden"></div>
+                </button>
+            </form>
+
+            <div id="registerToggle" class="auth-toggle hidden">
+                <p>আগে থেকেই অ্যাকাউন্ট আছে? <button type="button" id="showLogin">লগইন করুন</button></p>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Screen -->
-    <div id="loadingScreen" class="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex items-center justify-center">
+    <div id="loadingScreen" class="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex items-center justify-center hidden">
         <div class="text-center">
             <div class="loading-spinner mx-auto mb-4"></div>
-            <p class="text-lg text-gray-600 dark:text-gray-300">লোড হচ্ছে...</p>
+            <p class="text-lg text-gray-600 dark:text-gray-300">ডাটা লোড হচ্ছে...</p>
         </div>
     </div>
 
@@ -222,6 +397,14 @@
                     </div>
                     
                     <div class="flex items-center space-x-4">
+                        <!-- User Info -->
+                        <div class="flex items-center space-x-2">
+                            <span id="userEmail" class="text-sm text-gray-600 dark:text-gray-300"></span>
+                            <button id="logoutBtn" class="text-sm text-red-600 hover:text-red-800 dark:text-red-400">
+                                <i class="fas fa-sign-out-alt mr-1"></i>লগআউট
+                            </button>
+                        </div>
+                        
                         <!-- Firebase Sync Status -->
                         <div id="syncStatus" class="sync-status synced">
                             <i class="fas fa-database"></i>
@@ -571,39 +754,6 @@
     <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
     <script>
-function startApp() {
-  document.getElementById('loadingScreen').classList.add('hidden');
-  document.getElementById('loginSection').style.display = 'none';
-  document.getElementById('appContainer').classList.remove('hidden');
-
-  const user = firebase.auth().currentUser;
-  if (user) {
-    const uid = user.uid;
-    firebase.database().ref('users/' + uid + '/cashbook').once('value')
-      .then(snapshot => {
-        const data = snapshot.val();
-        if (data) {
-          books = data.books || [];
-          entries = data.entries || [];
-          currentBookId = data.currentBookId || null;
-        } else {
-          // নতুন ইউজার হলে
-          books = [{ id: Date.now().toString(), name: 'ব্যক্তিগত বই', createdAt: new Date().toISOString() }];
-          currentBookId = books[0].id;
-          entries = [];
-        }
-
-        saveUserData(); // লোকালেও সেভ করে রাখে
-        updateBookSelector();
-        updateSummary();
-        renderEntries();
-      })
-      .catch(err => {
-        console.error('❌ ডেটা লোডে সমস্যা:', err.message);
-      });
-  }
-}
- 
         // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBfScJbFejegAjUfQdse6v85FmsIUOiAHY",
@@ -617,9 +767,10 @@ function startApp() {
         };
 
         // Initialize Firebase
-        let app, analytics, db;
+        let app, analytics, db, auth;
         
         // Global variables
+        let currentUser = null;
         let currentBookId = null;
         let entries = [];
         let books = [];
@@ -639,6 +790,7 @@ function startApp() {
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             initializeFirebase();
+            setupAuthListeners();
             setupEventListeners();
             loadThemePreference();
         });
@@ -646,27 +798,275 @@ function startApp() {
         function initializeFirebase() {
             try {
                 app = firebase.initializeApp(firebaseConfig);
-                db = firebase.database(); // ✅ বাইরের global db ভেরিয়েবল ব্যবহার করুন
+                db = firebase.database();
+                auth = firebase.auth();
                 analytics = firebase.analytics(app);
                 console.log('Firebase initialized successfully');
-                updateSyncStatus('synced', 'Firebase সংযুক্ত');
             } catch (error) {
                 console.error('Firebase initialization failed:', error);
-                updateSyncStatus('error', 'Firebase ত্রুটি');
-                showToast('Firebase সংযোগে সমস্যা', 'warning');
+                showToast('Firebase সংযোগে সমস্যা', 'error');
             }
         }
 
-        function initializeApp() {
-            // Hide loading screen
-            setTimeout(() => {
-                document.getElementById('loadingScreen').classList.add('hidden');
-                document.getElementById('appContainer').classList.remove('hidden');
-                
-                
-                updateSummary();
-                renderEntries();
-            }, 1000);
+        function setupAuthListeners() {
+            // Login/Register form toggles
+            document.getElementById('showRegister').addEventListener('click', showRegisterForm);
+            document.getElementById('showLogin').addEventListener('click', showLoginForm);
+            
+            // Form submissions
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+            
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            
+            // Auth state observer
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                if (user) {
+                    document.getElementById('userEmail').textContent = user.email;
+                    showLoadingScreen();
+                    loadUserDataFromFirebase(user.uid);
+                } else {
+                    showLoginSection();
+                }
+            });
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('showRegister').parentElement.classList.remove('hidden');
+            document.getElementById('registerToggle').classList.add('hidden');
+            hideMessages();
+        }
+
+        function showRegisterForm() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('showRegister').parentElement.classList.add('hidden');
+            document.getElementById('registerToggle').classList.remove('hidden');
+            hideMessages();
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').classList.add('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
+        }
+
+        function showErrorMessage(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
+        }
+
+        function showSuccessMessage(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.classList.remove('hidden');
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showErrorMessage('ইমেইল এবং পাসওয়ার্ড লিখুন');
+                return;
+            }
+            
+            setLoading('loginBtn', 'loginBtnText', 'loginSpinner', true);
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    showSuccessMessage('লগইন সফল হয়েছে!');
+                    // Auth state change will handle the rest
+                })
+                .catch((error) => {
+                    setLoading('loginBtn', 'loginBtnText', 'loginSpinner', false);
+                    showErrorMessage(getErrorMessage(error.code));
+                });
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!email || !password || !confirmPassword) {
+                showErrorMessage('সব ফিল্ড পূরণ করুন');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showErrorMessage('পাসওয়ার্ড মিলছে না');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showErrorMessage('পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে');
+                return;
+            }
+            
+            setLoading('registerBtn', 'registerBtnText', 'registerSpinner', true);
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    showSuccessMessage('অ্যাকাউন্ট তৈরি হয়েছে!');
+                    // Auth state change will handle the rest
+                })
+                .catch((error) => {
+                    setLoading('registerBtn', 'registerBtnText', 'registerSpinner', false);
+                    showErrorMessage(getErrorMessage(error.code));
+                });
+        }
+
+        function handleLogout() {
+            auth.signOut()
+                .then(() => {
+                    showToast('লগআউট সফল', 'success');
+                })
+                .catch((error) => {
+                    showToast('লগআউটে সমস্যা', 'error');
+                });
+        }
+
+        function setLoading(btnId, textId, spinnerId, isLoading) {
+            const btn = document.getElementById(btnId);
+            const text = document.getElementById(textId);
+            const spinner = document.getElementById(spinnerId);
+            
+            if (isLoading) {
+                btn.disabled = true;
+                text.classList.add('hidden');
+                spinner.classList.remove('hidden');
+            } else {
+                btn.disabled = false;
+                text.classList.remove('hidden');
+                spinner.classList.add('hidden');
+            }
+        }
+
+        function getErrorMessage(errorCode) {
+            const messages = {
+                'auth/user-not-found': 'এই ইমেইলে কোন অ্যাকাউন্ট নেই',
+                'auth/wrong-password': 'ভুল পাসওয়ার্ড',
+                'auth/email-already-in-use': 'এই ইমেইল ইতিমধ্যে ব্যবহৃত',
+                'auth/weak-password': 'পাসওয়ার্ড খুব সহজ',
+                'auth/invalid-email': 'ইমেইল ঠিকানা সঠিক নয়',
+                'auth/too-many-requests': 'অনেকবার চেষ্টা করেছেন, পরে চেষ্টা করুন'
+            };
+            return messages[errorCode] || 'কোন সমস্যা হয়েছে, পুনরায় চেষ্টা করুন';
+        }
+
+        function showLoginSection() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('loadingScreen').classList.add('hidden');
+            document.getElementById('appContainer').classList.add('hidden');
+        }
+
+        function showLoadingScreen() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('loadingScreen').classList.remove('hidden');
+            document.getElementById('appContainer').classList.add('hidden');
+        }
+
+        function showAppContainer() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('loadingScreen').classList.add('hidden');
+            document.getElementById('appContainer').classList.remove('hidden');
+        }
+
+        function loadUserDataFromFirebase(uid) {
+            updateSyncStatus('syncing', 'ডাটা লোড হচ্ছে...');
+            
+            db.ref('users/' + uid + '/cashbook').once('value')
+                .then(snapshot => {
+                    const data = snapshot.val();
+                    if (data) {
+                        books = data.books || [];
+                        entries = data.entries || [];
+                        currentBookId = data.currentBookId || null;
+                        updateSyncStatus('synced', 'Firebase থেকে লোড');
+                    } else {
+                        // Create default data for new user
+                        books = [{ id: Date.now().toString(), name: 'ব্যক্তিগত বই', createdAt: new Date().toISOString() }];
+                        currentBookId = books[0].id;
+                        entries = [];
+                        saveUserDataToFirebase();
+                    }
+                    
+                    // Also save to localStorage for offline access
+                    saveUserDataToLocal();
+                    initializeApp();
+                })
+                .catch(error => {
+                    console.error('Error loading data from Firebase:', error);
+                    updateSyncStatus('error', 'লোড করতে ব্যর্থ');
+                    // Try to load from localStorage
+                    loadUserDataFromLocal();
+                    initializeApp();
+                });
+        }
+
+        function saveUserDataToFirebase() {
+            if (!currentUser) return;
+            
+            updateSyncStatus('syncing', 'সিঙ্ক হচ্ছে...');
+            
+            const data = {
+                books: books,
+                entries: entries,
+                currentBookId: currentBookId,
+                lastUpdated: new Date().toISOString()
+            };
+            
+            db.ref('users/' + currentUser.uid + '/cashbook').set(data)
+                .then(() => {
+                    updateSyncStatus('synced', 'Firebase এ সংরক্ষিত');
+                })
+                .catch(error => {
+                    console.error('Error saving to Firebase:', error);
+                    updateSyncStatus('error', 'সিঙ্ক ব্যর্থ');
+                });
+        }
+
+        function loadUserDataFromLocal() {
+            const userData = safeGetLocalStorage('cashbook_data');
+            if (userData) {
+                books = userData.books || [];
+                entries = userData.entries || [];
+                currentBookId = userData.currentBookId || null;
+            } else {
+                // Create default book
+                books = [{ id: Date.now().toString(), name: 'ব্যক্তিগত বই', createdAt: new Date().toISOString() }];
+                currentBookId = books[0].id;
+                entries = [];
+            }
+        }
+
+        function saveUserDataToLocal() {
+            const data = {
+                books: books,
+                entries: entries,
+                currentBookId: currentBookId
+            };
+            safeSetLocalStorage('cashbook_data', data);
+        }
+
+        function saveUserData() {
+            saveUserDataToLocal();
+            if (currentUser) {
+                saveUserDataToFirebase();
+            } else {
+                updateSyncStatus('offline', 'স্থানীয় সংরক্ষিত');
+            }
         }
 
         function setupEventListeners() {
@@ -710,6 +1110,15 @@ function startApp() {
             
             // Set default date
             document.getElementById('entryDate').valueAsDate = new Date();
+        }
+
+        function initializeApp() {
+            setTimeout(() => {
+                updateBookSelector();
+                updateSummary();
+                renderEntries();
+                showAppContainer();
+            }, 1000);
         }
 
         // Safe localStorage operations
@@ -758,7 +1167,7 @@ function startApp() {
             syncStatus.className = `sync-status ${status}`;
             
             const icons = {
-                synced: 'fa-database',
+                synced: 'fa-check-circle',
                 syncing: 'fa-sync-alt fa-spin',
                 error: 'fa-exclamation-triangle',
                 offline: 'fa-database'
@@ -769,48 +1178,6 @@ function startApp() {
                 <span>${text}</span>
             `;
         }
-
-        function loadUserData() {
-            const userData = safeGetLocalStorage('cashbook_data');
-            if (userData) {
-                books = userData.books || [];
-                entries = userData.entries || [];
-                currentBookId = userData.currentBookId || null;
-            } else {
-                // Create default book
-                books = [{ id: Date.now().toString(), name: 'ব্যক্তিগত বই', createdAt: new Date().toISOString() }];
-                currentBookId = books[0].id;
-                entries = [];
-                saveUserData();
-            }
-            
-            updateBookSelector();
-        }
-
-        function saveUserData() {
-  const data = {
-    books: books,
-    entries: entries,
-    currentBookId: currentBookId
-  };
-
-  safeSetLocalStorage('cashbook_data', data);
-  updateSyncStatus('synced', 'স্থানীয় সংরক্ষিত');
-
-  // ✅ Firebase এ UID অনুযায়ী সেভ
-  const user = firebase.auth().currentUser;
-  if (user) {
-    const uid = user.uid;
-    firebase.database().ref('users/' + uid + '/cashbook').set(data)
-      .then(() => {
-        updateSyncStatus('synced', 'Firebase এ সংরক্ষিত');
-      })
-      .catch((err) => {
-        updateSyncStatus('error', 'Firebase সেভ ব্যর্থ');
-        console.error('❌ Firebase Error:', err.message);
-      });
-  }
-}
 
         function updateBookSelector() {
             const selector = document.getElementById('currentBook');
@@ -1445,85 +1812,10 @@ function startApp() {
 
         // Auto-save functionality
         setInterval(() => {
-            if (currentBookId) {
+            if (currentBookId && currentUser) {
                 saveUserData();
             }
         }, 30000); // Auto-save every 30 seconds
-
-// ইউজার লগইন ফাংশন
-function loginUser() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  firebase.auth().signInWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      alert("লগইন সফল! UID: " + user.uid);
-      console.log("User UID:", user.uid);
-      document.getElementById("loginSection").style.display = "none";
-      document.getElementById("appContainer").classList.remove('hidden');
-    })
-    .catch((error) => {
-      alert("লগইন ব্যর্থ: " + error.message);
-    });
-}
-
-// ইউজার লগইন থাকলে সরাসরি অ্যাপ দেখাও
-firebase.auth().onAuthStateChanged(user => {
-  if (user) {
-    const uid = user.uid;
-    firebase.database().ref('users/' + uid + '/cashbook').once('value')
-      .then(snapshot => {
-        const data = snapshot.val();
-        if (data) {
-          books = data.books || [];
-          entries = data.entries || [];
-          currentBookId = data.currentBookId || null;
-        }
-        saveUserData(); // লোকালেও সেভ
-        startApp(); // আপনার মূল অ্যাপ চালু করুন
-      })
-      .catch(err => {
-        console.error('❌ ডাটা লোডে সমস্যা:', err.message);
-        startApp(); // ডাটা না পেলেও অ্যাপ চালু করুন
-      });
-  } else {
-    showLoginForm();
-  }
-});
-
-function startApp() {
-  document.getElementById('loadingScreen').classList.add('hidden');
-  document.getElementById('loginSection').style.display = 'none';
-  document.getElementById('appContainer').classList.remove('hidden');
-
-  const user = firebase.auth().currentUser;
-  if (user) {
-    const uid = user.uid;
-    firebase.database().ref('users/' + uid + '/cashbook').once('value')
-      .then(snapshot => {
-        const data = snapshot.val();
-        if (data) {
-          books = data.books || [];
-          entries = data.entries || [];
-          currentBookId = data.currentBookId || null;
-        } else {
-          books = [{ id: Date.now().toString(), name: 'ব্যক্তিগত বই', createdAt: new Date().toISOString() }];
-          currentBookId = books[0].id;
-          entries = [];
-        }
-
-        saveUserData();
-        updateBookSelector();
-        updateSummary();
-        renderEntries();
-      })
-      .catch(err => {
-        console.error('❌ ডেটা লোডে সমস্যা:', err.message);
-      });
-  }
-}    
-     
     </script>
 </body>
 </html>
