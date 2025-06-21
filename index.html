@@ -571,6 +571,39 @@
     <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
     <script>
+function startApp() {
+  document.getElementById('loadingScreen').classList.add('hidden');
+  document.getElementById('loginSection').style.display = 'none';
+  document.getElementById('appContainer').classList.remove('hidden');
+
+  const user = firebase.auth().currentUser;
+  if (user) {
+    const uid = user.uid;
+    firebase.database().ref('users/' + uid + '/cashbook').once('value')
+      .then(snapshot => {
+        const data = snapshot.val();
+        if (data) {
+          books = data.books || [];
+          entries = data.entries || [];
+          currentBookId = data.currentBookId || null;
+        } else {
+          // নতুন ইউজার হলে
+          books = [{ id: Date.now().toString(), name: 'ব্যক্তিগত বই', createdAt: new Date().toISOString() }];
+          currentBookId = books[0].id;
+          entries = [];
+        }
+
+        saveUserData(); // লোকালেও সেভ করে রাখে
+        updateBookSelector();
+        updateSummary();
+        renderEntries();
+      })
+      .catch(err => {
+        console.error('❌ ডেটা লোডে সমস্যা:', err.message);
+      });
+  }
+}
+ 
         // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBfScJbFejegAjUfQdse6v85FmsIUOiAHY",
@@ -606,7 +639,6 @@
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             initializeFirebase();
-            initializeApp();
             setupEventListeners();
             loadThemePreference();
         });
@@ -631,7 +663,7 @@
                 document.getElementById('loadingScreen').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
                 
-                loadUserData();
+                
                 updateSummary();
                 renderEntries();
             }, 1000);
@@ -1459,6 +1491,38 @@ firebase.auth().onAuthStateChanged(user => {
     showLoginForm();
   }
 });
+
+function startApp() {
+  document.getElementById('loadingScreen').classList.add('hidden');
+  document.getElementById('loginSection').style.display = 'none';
+  document.getElementById('appContainer').classList.remove('hidden');
+
+  const user = firebase.auth().currentUser;
+  if (user) {
+    const uid = user.uid;
+    firebase.database().ref('users/' + uid + '/cashbook').once('value')
+      .then(snapshot => {
+        const data = snapshot.val();
+        if (data) {
+          books = data.books || [];
+          entries = data.entries || [];
+          currentBookId = data.currentBookId || null;
+        } else {
+          books = [{ id: Date.now().toString(), name: 'ব্যক্তিগত বই', createdAt: new Date().toISOString() }];
+          currentBookId = books[0].id;
+          entries = [];
+        }
+
+        saveUserData();
+        updateBookSelector();
+        updateSummary();
+        renderEntries();
+      })
+      .catch(err => {
+        console.error('❌ ডেটা লোডে সমস্যা:', err.message);
+      });
+  }
+}    
      
     </script>
 </body>
