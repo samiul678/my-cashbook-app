@@ -614,7 +614,7 @@
         function initializeFirebase() {
             try {
                 app = firebase.initializeApp(firebaseConfig);
-                const db = firebase.database(); // ✅ এটা Firebase ডাটাবেজের রেফারেন্স
+                db = firebase.database(); // ✅ বাইরের global db ভেরিয়েবল ব্যবহার করুন
                 analytics = firebase.analytics(app);
                 console.log('Firebase initialized successfully');
                 updateSyncStatus('synced', 'Firebase সংযুক্ত');
