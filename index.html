@@ -9,7 +9,6 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     
     <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -352,6 +351,10 @@
             font-weight: 600;
         }
     </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
     <!-- Login Section -->
@@ -641,9 +644,9 @@
                 </h3>
                 
                 <div class="grid grid-cols-2 gap-4">
-                    <button id="exportPdfBtn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
-                        <i class="fas fa-file-pdf mr-1"></i>PDF ডাউনলোড
-                    </button>
+                    <button onclick="exportToPdfMake()" class="px-4 py-2 bg-red-500 text-white rounded">
+    PDF ডাউনলোড
+</button>
                     <button id="exportCsvBtn" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
                         <i class="fas fa-file-csv mr-1"></i>CSV ডাউনলোড
                     </button>
@@ -1975,6 +1978,29 @@
                 saveUserData();
             }
         }, 30000); // Auto-save every 30 seconds
-    </script>
+function exportToPdfMake() {
+    const docDefinition = {
+        content: [
+            { text: '💰 আমার ক্যাশবুক রিপোর্ট', style: 'header' },
+            { text: 'তারিখ: ' + new Date().toLocaleDateString('bn-BD'), margin: [0, 10] },
+            { text: 'মোট আয়: ৫০০০ ৳', style: 'subheader' },
+            { text: 'মোট খরচ: ২০০০ ৳', style: 'subheader' },
+            { text: 'ব্যালেন্স: ৩০০০ ৳', style: 'subheader' },
+        ],
+        styles: {
+            header: {
+                fontSize: 18,
+                bold: true
+            },
+            subheader: {
+                fontSize: 14,
+                margin: [0, 4]
+            }
+        }
+    };
+
+    pdfMake.createPdf(docDefinition).download('amar-cashbook.pdf');
+}
+</script>
 </body>
 </html>
