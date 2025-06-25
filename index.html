@@ -1399,18 +1399,7 @@
         }
 
         function updateSummary() {
-            const bookEntries = getCurrentBookEntries();
-            
-            let totalIncome = 0;
-            let totalExpense = 0;
-            
-            bookEntries.forEach(entry => {
-                if (entry.type === 'income') {
-                    totalIncome += entry.amount;
-                } else {
-                    totalExpense += entry.amount;
-                }
-                function updateFilteredSummary() {
+            function updateFilteredSummary() {
     const bookEntries = getCurrentBookEntries();
     const filteredEntries = applyCurrentFilters(bookEntries);
 
