@@ -17,6 +17,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
+    <!-- PDFMake for Bengali support -->
+    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/pdfmake.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/vfs_fonts.js"></script>
+    
     <style>
         * {
             font-family: 'Noto Sans Bengali', sans-serif;
@@ -351,9 +355,6 @@
             font-weight: 600;
         }
     </style>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
@@ -644,9 +645,9 @@
                 </h3>
                 
                 <div class="grid grid-cols-2 gap-4">
-                    <button onclick="exportToPdfMake()" class="px-4 py-2 bg-red-500 text-white rounded">
-    PDF ডাউনলোড
-</button>
+                    <button onclick="exportToPdfMake()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
+                        <i class="fas fa-file-pdf mr-1"></i>PDF ডাউনলোড
+                    </button>
                     <button id="exportCsvBtn" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
                         <i class="fas fa-file-csv mr-1"></i>CSV ডাউনলোড
                     </button>
@@ -1144,7 +1145,6 @@
             document.getElementById('filterCategory').addEventListener('change', applyFilters);
             
             // Export buttons
-            document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
             document.getElementById('exportCsvBtn').addEventListener('click', exportToCSV);
             
             // Table actions
@@ -1706,15 +1706,14 @@
             );
         }
 
-        function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            // Add Bengali font support
-            const bengaliFont = 'NotoSansBengali';
-            
+        function exportToPdfMake() {
             const bookEntries = getCurrentBookEntries();
             const filteredEntries = applyCurrentFilters(bookEntries);
+            
+            if (filteredEntries.length === 0) {
+                showToast('এক্সপোর্ট করার জন্য কোন ডাটা নেই', 'warning');
+                return;
+            }
             
             // Calculate totals
             let totalIncome = 0;
@@ -1729,18 +1728,7 @@
             });
             
             const balance = totalIncome - totalExpense;
-            
-            // Add content to PDF with better Bengali support
-            doc.setFontSize(20);
-            doc.text('আমার ক্যাশবুক রিপোর্ট', 20, 20);
-            
-            doc.setFontSize(12);
-            doc.text(`তারিখ: ${new Date().toLocaleDateString('bn-BD')}`, 20, 35);
-            
             const currentBook = books.find(b => b.id === currentBookId);
-            if (currentBook) {
-                doc.text(`বই: ${currentBook.name}`, 20, 45);
-            }
             
             // Check if filtered
             const hasFilters = document.getElementById('filterStartDate').value ||
@@ -1749,65 +1737,145 @@
                               document.getElementById('filterCategory').value ||
                               document.getElementById('searchBox').value.trim();
             
-            if (hasFilters) {
-                doc.text('ফিল্টারকৃত ডাটা', 20, 55);
-            }
+            // Prepare table data
+            const tableBody = filteredEntries.map(entry => {
+                const date = new Date(entry.date);
+                const dayName = bengaliDays[date.getDay()];
+                return [
+                    formatDate(entry.date),
+                    dayName,
+                    entry.type === 'income' ? 'আয়' : 'খরচ',
+                    formatCurrency(entry.amount),
+                    entry.category,
+                    entry.note || '-'
+                ];
+            });
             
-            // Summary
-            doc.setFontSize(16);
-            doc.text('সারাংশ:', 20, 70);
-            
-            doc.setFontSize(12);
-            doc.text(`মোট আয়: ${formatCurrency(totalIncome)}`, 20, 85);
-            doc.text(`মোট খরচ: ${formatCurrency(totalExpense)}`, 20, 95);
-            doc.text(`ব্যালেন্স: ${formatCurrency(balance)}`, 20, 105);
-            doc.text(`মোট এন্ট্রি: ${filteredEntries.length}`, 20, 115);
-            
-            // Entries table
-            if (filteredEntries.length > 0) {
-                doc.setFontSize(16);
-                doc.text('এন্ট্রি তালিকা:', 20, 135);
-                
-                let yPos = 150;
-                doc.setFontSize(9);
-                
-                // Table header
-                doc.text('তারিখ', 20, yPos);
-                doc.text('ধরন', 55, yPos);
-                doc.text('পরিমাণ', 80, yPos);
-                doc.text('ক্যাটেগরি', 120, yPos);
-                doc.text('নোট', 160, yPos);
-                
-                yPos += 10;
-                
-                // Add line under header
-                doc.line(20, yPos - 2, 190, yPos - 2);
-                
-                filteredEntries.forEach(entry => {
-                    if (yPos > 270) {
-                        doc.addPage();
-                        yPos = 20;
-                        
-                        // Add header on new page
-                        doc.setFontSize(9);
-                        doc.text('তারিখ', 20, yPos);
-                        doc.text('ধরন', 55, yPos);
-                        doc.text('পরিমাণ', 80, yPos);
-                        doc.text('ক্যাটেগরি', 120, yPos);
-                        doc.text('নোট', 160, yPos);
-                        yPos += 10;
-                        doc.line(20, yPos - 2, 190, yPos - 2);
+            const docDefinition = {
+                content: [
+                    {
+                        text: '💰 আমার ক্যাশবুক রিপোর্ট',
+                        style: 'header',
+                        alignment: 'center',
+                        margin: [0, 0, 0, 20]
+                    },
+                    {
+                        columns: [
+                            {
+                                text: `তারিখ: ${new Date().toLocaleDateString('bn-BD')}`,
+                                style: 'subheader'
+                            },
+                            {
+                                text: currentBook ? `বই: ${currentBook.name}` : '',
+                                style: 'subheader',
+                                alignment: 'right'
+                            }
+                        ],
+                        margin: [0, 0, 0, 10]
+                    },
+                    
+                    // Add filtered status if applicable
+                    ...(hasFilters ? [{
+                        text: 'ফিল্টারকৃত ডাটা',
+                        style: 'filterInfo',
+                        alignment: 'center',
+                        margin: [0, 0, 0, 15]
+                    }] : []),
+                    
+                    // Summary section
+                    {
+                        text: 'আর্থিক সারাংশ',
+                        style: 'sectionHeader',
+                        margin: [0, 10, 0, 10]
+                    },
+                    {
+                        table: {
+                            widths: ['*', '*', '*', '*'],
+                            body: [
+                                ['মোট আয়', 'মোট খরচ', 'ব্যালেন্স', 'মোট এন্ট্রি'],
+                                [
+                                    formatCurrency(totalIncome),
+                                    formatCurrency(totalExpense),
+                                    formatCurrency(balance),
+                                    `${filteredEntries.length}টি`
+                                ]
+                            ]
+                        },
+                        layout: {
+                            fillColor: function (rowIndex, node, columnIndex) {
+                                return (rowIndex === 0) ? '#e3f2fd' : null;
+                            }
+                        },
+                        margin: [0, 0, 0, 20]
+                    },
+                    
+                    // Entries table
+                    {
+                        text: 'এন্ট্রি তালিকা',
+                        style: 'sectionHeader',
+                        margin: [0, 10, 0, 10]
+                    },
+                    {
+                        table: {
+                            headerRows: 1,
+                            widths: ['auto', 'auto', 'auto', 'auto', '*', '*'],
+                            body: [
+                                ['তারিখ', 'দিন', 'ধরন', 'পরিমাণ', 'ক্যাটেগরি', 'নোট'],
+                                ...tableBody
+                            ]
+                        },
+                        layout: {
+                            fillColor: function (rowIndex, node, columnIndex) {
+                                return (rowIndex === 0) ? '#f5f5f5' : null;
+                            },
+                            hLineWidth: function (i, node) {
+                                return (i === 0 || i === 1 || i === node.table.body.length) ? 1 : 0.5;
+                            },
+                            vLineWidth: function (i, node) {
+                                return 0.5;
+                            }
+                        }
                     }
-                    
-                    doc.text(formatDate(entry.date), 20, yPos);
-                    doc.text(entry.type === 'income' ? 'আয়' : 'খরচ', 55, yPos);
-                    doc.text(formatCurrency(entry.amount), 80, yPos);
-                    doc.text(entry.category, 120, yPos);
-                    doc.text((entry.note || '-').substring(0, 25), 160, yPos);
-                    
-                    yPos += 8;
-                });
-            }
+                ],
+                
+                styles: {
+                    header: {
+                        fontSize: 18,
+                        bold: true,
+                        color: '#1976d2'
+                    },
+                    subheader: {
+                        fontSize: 12,
+                        margin: [0, 4]
+                    },
+                    sectionHeader: {
+                        fontSize: 14,
+                        bold: true,
+                        color: '#333'
+                    },
+                    filterInfo: {
+                        fontSize: 11,
+                        italics: true,
+                        color: '#f57c00',
+                        bold: true
+                    }
+                },
+                
+                defaultStyle: {
+                    fontSize: 10,
+                    font: 'Roboto'
+                },
+                
+                pageSize: 'A4',
+                pageMargins: [40, 60, 40, 60],
+                
+                info: {
+                    title: 'আমার ক্যাশবুক রিপোর্ট',
+                    author: 'ক্যাশবুক অ্যাপ',
+                    subject: 'আর্থিক রিপোর্ট',
+                    keywords: 'আয়, খরচ, হিসাব'
+                }
+            };
             
             // Generate filename
             const dateStr = new Date().toISOString().split('T')[0];
@@ -1815,8 +1883,14 @@
                 `cashbook-filtered-${dateStr}.pdf` : 
                 `cashbook-report-${dateStr}.pdf`;
             
-            doc.save(filename);
-            showToast('PDF রিপোর্ট ডাউনলোড হয়েছে', 'success');
+            // Create and download PDF
+            try {
+                pdfMake.createPdf(docDefinition).download(filename);
+                showToast('PDF রিপোর্ট ডাউনলোড হয়েছে', 'success');
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                showToast('PDF তৈরি করতে সমস্যা হয়েছে', 'error');
+            }
         }
 
         function exportToCSV() {
@@ -1978,29 +2052,7 @@
                 saveUserData();
             }
         }, 30000); // Auto-save every 30 seconds
-function exportToPdfMake() {
-    const docDefinition = {
-        content: [
-            { text: '💰 আমার ক্যাশবুক রিপোর্ট', style: 'header' },
-            { text: 'তারিখ: ' + new Date().toLocaleDateString('bn-BD'), margin: [0, 10] },
-            { text: 'মোট আয়: ৫০০০ ৳', style: 'subheader' },
-            { text: 'মোট খরচ: ২০০০ ৳', style: 'subheader' },
-            { text: 'ব্যালেন্স: ৩০০০ ৳', style: 'subheader' },
-        ],
-        styles: {
-            header: {
-                fontSize: 18,
-                bold: true
-            },
-            subheader: {
-                fontSize: 14,
-                margin: [0, 4]
-            }
-        }
-    };
 
-    pdfMake.createPdf(docDefinition).download('amar-cashbook.pdf');
-}
-</script>
+    </script>
 </body>
 </html>
