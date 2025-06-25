@@ -17,9 +17,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     
-    <!-- PDFMake for Bengali support -->
-    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/pdfmake.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/vfs_fonts.js"></script>
+    <!-- html2pdf.js for Bengali PDF support -->
+    <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
     
     <style>
         * {
@@ -354,6 +353,104 @@
             font-size: 1rem;
             font-weight: 600;
         }
+
+        /* PDF Report Styles */
+        .pdf-report {
+            background: white;
+            color: black;
+            font-family: 'Noto Sans Bengali', sans-serif;
+            padding: 40px;
+            line-height: 1.6;
+        }
+
+        .pdf-report h1 {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #1976d2;
+        }
+
+        .pdf-report .report-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .pdf-report .filter-info {
+            text-align: center;
+            font-style: italic;
+            color: #f57c00;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .pdf-report .summary-section {
+            margin-bottom: 30px;
+        }
+
+        .pdf-report .summary-section h2 {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .pdf-report .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .pdf-report .summary-table th,
+        .pdf-report .summary-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .pdf-report .summary-table th {
+            background-color: #e3f2fd;
+            font-weight: bold;
+        }
+
+        .pdf-report .entries-section h2 {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .pdf-report .entries-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .pdf-report .entries-table th,
+        .pdf-report .entries-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .pdf-report .entries-table th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+
+        .pdf-report .entries-table .amount-cell {
+            text-align: right;
+        }
+
+        .pdf-report .income-row {
+            background-color: #f0f9ff;
+        }
+
+        .pdf-report .expense-row {
+            background-color: #fef2f2;
+        }
     </style>
     
 </head>
@@ -645,7 +742,7 @@
                 </h3>
                 
                 <div class="grid grid-cols-2 gap-4">
-                    <button onclick="exportToPdfMake()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
+                    <button onclick="exportToPDF()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
                         <i class="fas fa-file-pdf mr-1"></i>PDF ডাউনলোড
                     </button>
                     <button id="exportCsvBtn" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
@@ -801,6 +898,11 @@
 
     <!-- Toast Notification Container -->
     <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Hidden PDF Report Container -->
+    <div id="pdfReportContainer" class="hidden">
+        <!-- PDF content will be dynamically generated here -->
+    </div>
 
     <script>
         // Firebase Configuration
@@ -1706,7 +1808,8 @@
             );
         }
 
-        function exportToPdfMake() {
+        // PDF Export using html2pdf.js
+        function exportToPDF() {
             const bookEntries = getCurrentBookEntries();
             const filteredEntries = applyCurrentFilters(bookEntries);
             
@@ -1714,6 +1817,8 @@
                 showToast('এক্সপোর্ট করার জন্য কোন ডাটা নেই', 'warning');
                 return;
             }
+            
+            showToast('PDF তৈরি হচ্ছে...', 'info');
             
             // Calculate totals
             let totalIncome = 0;
@@ -1737,160 +1842,127 @@
                               document.getElementById('filterCategory').value ||
                               document.getElementById('searchBox').value.trim();
             
-            // Prepare table data
-            const tableBody = filteredEntries.map(entry => {
-                const date = new Date(entry.date);
-                const dayName = bengaliDays[date.getDay()];
-                return [
-                    formatDate(entry.date),
-                    dayName,
-                    entry.type === 'income' ? 'আয়' : 'খরচ',
-                    formatCurrency(entry.amount),
-                    entry.category,
-                    entry.note || '-'
-                ];
-            });
+            // Generate PDF content
+            const pdfContent = generatePDFContent(filteredEntries, totalIncome, totalExpense, balance, currentBook, hasFilters);
             
-            const docDefinition = {
-                content: [
-                    {
-                        text: '💰 আমার ক্যাশবুক রিপোর্ট',
-                        style: 'header',
-                        alignment: 'center',
-                        margin: [0, 0, 0, 20]
-                    },
-                    {
-                        columns: [
-                            {
-                                text: `তারিখ: ${new Date().toLocaleDateString('bn-BD')}`,
-                                style: 'subheader'
-                            },
-                            {
-                                text: currentBook ? `বই: ${currentBook.name}` : '',
-                                style: 'subheader',
-                                alignment: 'right'
-                            }
-                        ],
-                        margin: [0, 0, 0, 10]
-                    },
-                    
-                    // Add filtered status if applicable
-                    ...(hasFilters ? [{
-                        text: 'ফিল্টারকৃত ডাটা',
-                        style: 'filterInfo',
-                        alignment: 'center',
-                        margin: [0, 0, 0, 15]
-                    }] : []),
-                    
-                    // Summary section
-                    {
-                        text: 'আর্থিক সারাংশ',
-                        style: 'sectionHeader',
-                        margin: [0, 10, 0, 10]
-                    },
-                    {
-                        table: {
-                            widths: ['*', '*', '*', '*'],
-                            body: [
-                                ['মোট আয়', 'মোট খরচ', 'ব্যালেন্স', 'মোট এন্ট্রি'],
-                                [
-                                    formatCurrency(totalIncome),
-                                    formatCurrency(totalExpense),
-                                    formatCurrency(balance),
-                                    `${filteredEntries.length}টি`
-                                ]
-                            ]
-                        },
-                        layout: {
-                            fillColor: function (rowIndex, node, columnIndex) {
-                                return (rowIndex === 0) ? '#e3f2fd' : null;
-                            }
-                        },
-                        margin: [0, 0, 0, 20]
-                    },
-                    
-                    // Entries table
-                    {
-                        text: 'এন্ট্রি তালিকা',
-                        style: 'sectionHeader',
-                        margin: [0, 10, 0, 10]
-                    },
-                    {
-                        table: {
-                            headerRows: 1,
-                            widths: ['auto', 'auto', 'auto', 'auto', '*', '*'],
-                            body: [
-                                ['তারিখ', 'দিন', 'ধরন', 'পরিমাণ', 'ক্যাটেগরি', 'নোট'],
-                                ...tableBody
-                            ]
-                        },
-                        layout: {
-                            fillColor: function (rowIndex, node, columnIndex) {
-                                return (rowIndex === 0) ? '#f5f5f5' : null;
-                            },
-                            hLineWidth: function (i, node) {
-                                return (i === 0 || i === 1 || i === node.table.body.length) ? 1 : 0.5;
-                            },
-                            vLineWidth: function (i, node) {
-                                return 0.5;
-                            }
-                        }
-                    }
-                ],
-                
-                styles: {
-                    header: {
-                        fontSize: 18,
-                        bold: true,
-                        color: '#1976d2'
-                    },
-                    subheader: {
-                        fontSize: 12,
-                        margin: [0, 4]
-                    },
-                    sectionHeader: {
-                        fontSize: 14,
-                        bold: true,
-                        color: '#333'
-                    },
-                    filterInfo: {
-                        fontSize: 11,
-                        italics: true,
-                        color: '#f57c00',
-                        bold: true
-                    }
+            // Create temporary container for PDF
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = pdfContent;
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.left = '-9999px';
+            tempDiv.style.top = '-9999px';
+            document.body.appendChild(tempDiv);
+            
+            // PDF options
+            const options = {
+                margin: 1,
+                filename: hasFilters ? 
+                    `cashbook-filtered-${new Date().toISOString().split('T')[0]}.pdf` : 
+                    `cashbook-report-${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    letterRendering: true
                 },
-                
-                defaultStyle: {
-                    fontSize: 10,
-                    font: 'Roboto'
-                },
-                
-                pageSize: 'A4',
-                pageMargins: [40, 60, 40, 60],
-                
-                info: {
-                    title: 'আমার ক্যাশবুক রিপোর্ট',
-                    author: 'ক্যাশবুক অ্যাপ',
-                    subject: 'আর্থিক রিপোর্ট',
-                    keywords: 'আয়, খরচ, হিসাব'
+                jsPDF: { 
+                    unit: 'in', 
+                    format: 'a4', 
+                    orientation: 'portrait'
                 }
             };
             
-            // Generate filename
-            const dateStr = new Date().toISOString().split('T')[0];
-            const filename = hasFilters ? 
-                `cashbook-filtered-${dateStr}.pdf` : 
-                `cashbook-report-${dateStr}.pdf`;
+            // Generate PDF
+            html2pdf()
+                .set(options)
+                .from(tempDiv)
+                .save()
+                .then(() => {
+                    document.body.removeChild(tempDiv);
+                    showToast('PDF রিপোর্ট ডাউনলোড সম্পন্ন', 'success');
+                })
+                .catch(error => {
+                    console.error('PDF generation error:', error);
+                    document.body.removeChild(tempDiv);
+                    showToast('PDF তৈরি করতে সমস্যা হয়েছে', 'error');
+                });
+        }
+
+        function generatePDFContent(entries, totalIncome, totalExpense, balance, currentBook, hasFilters) {
+            const sortedEntries = sortEntriesList(entries, 'date', 'desc');
             
-            // Create and download PDF
-            try {
-                pdfMake.createPdf(docDefinition).download(filename);
-                showToast('PDF রিপোর্ট ডাউনলোড হয়েছে', 'success');
-            } catch (error) {
-                console.error('PDF generation error:', error);
-                showToast('PDF তৈরি করতে সমস্যা হয়েছে', 'error');
-            }
+            let entriesHTML = '';
+            sortedEntries.forEach(entry => {
+                const date = new Date(entry.date);
+                const dayName = bengaliDays[date.getDay()];
+                const rowClass = entry.type === 'income' ? 'income-row' : 'expense-row';
+                
+                entriesHTML += `
+                    <tr class="${rowClass}">
+                        <td>${formatDate(entry.date)}</td>
+                        <td>${dayName}</td>
+                        <td>${entry.type === 'income' ? 'আয়' : 'খরচ'}</td>
+                        <td class="amount-cell">${formatCurrency(entry.amount)}</td>
+                        <td>${entry.category}</td>
+                        <td>${entry.note || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            return `
+                <div class="pdf-report">
+                    <h1>💰 আমার ক্যাশবুক রিপোর্ট</h1>
+                    
+                    <div class="report-header">
+                        <div>তারিখ: ${new Date().toLocaleDateString('bn-BD')}</div>
+                        <div>${currentBook ? `বই: ${currentBook.name}` : ''}</div>
+                    </div>
+                    
+                    ${hasFilters ? '<div class="filter-info">ফিল্টারকৃত ডাটা</div>' : ''}
+                    
+                    <div class="summary-section">
+                        <h2>আর্থিক সারাংশ</h2>
+                        <table class="summary-table">
+                            <thead>
+                                <tr>
+                                    <th>মোট আয়</th>
+                                    <th>মোট খরচ</th>
+                                    <th>ব্যালেন্স</th>
+                                    <th>মোট এন্ট্রি</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>${formatCurrency(totalIncome)}</td>
+                                    <td>${formatCurrency(totalExpense)}</td>
+                                    <td style="color: ${balance >= 0 ? '#059669' : '#dc2626'}">${formatCurrency(balance)}</td>
+                                    <td>${entries.length}টি</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="entries-section">
+                        <h2>এন্ট্রি তালিকা</h2>
+                        <table class="entries-table">
+                            <thead>
+                                <tr>
+                                    <th>তারিখ</th>
+                                    <th>দিন</th>
+                                    <th>ধরন</th>
+                                    <th>পরিমাণ</th>
+                                    <th>ক্যাটেগরি</th>
+                                    <th>নোট</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${entriesHTML}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
         }
 
         function exportToCSV() {
