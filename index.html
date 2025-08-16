@@ -766,6 +766,12 @@
                                 <button id="selectAllBtn" class="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors">
                                     সব নির্বাচন
                                 </button>
+                                <button id="copySelectedBtn" class="px-3 py-1 text-sm bg-yellow-500 hover:bg-yellow-600 text-white rounded transition-colors">
+                                    কপি
+                                </button>
+                                <button id="moveSelectedBtn" class="px-3 py-1 text-sm bg-purple-500 hover:bg-purple-600 text-white rounded transition-colors">
+                                    মুভ
+                                </button>
                                 <button id="deleteSelectedBtn" class="px-3 py-1 text-sm bg-red-500 hover:bg-red-600 text-white rounded transition-colors">
                                     নির্বাচিত মুছুন
                                 </button>
@@ -798,6 +804,9 @@
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                     নোট
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    এন্ট্রির সময়
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider no-print">
                                     অ্যাকশন
@@ -847,71 +856,87 @@
                     <i class="fas fa-list text-lg"></i>
                     <span class="text-xs mt-1">এন্ট্রি</span>
                 </button>
-                <button class="flex flex-col items-center py-2 px-4 text-gray-600 dark:text-gray-300" onclick="scrollToSection('export')">
-                    <i class="fas fa-download text-lg"></i>
-                    <span class="text-xs mt-1">এক্সপোর্ট</span>
+                <button class="flex flex-col items-center py-2 px-4 text-gray-600 dark:text-gray-300" onclick="scrollToSection('filters')">
+                    <i class="fas fa-filter text-lg"></i>
+                    <span class="text-xs mt-1">ফিল্টার</span>
                 </button>
             </div>
         </nav>
-    </div>
 
-    <!-- Floating Action Button -->
-    <div class="floating-buttons fixed right-6 bottom-24 md:bottom-6 z-20 no-print">
-        <button id="fab" class="w-14 h-14 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center transition-all duration-300 transform hover:scale-110">
-            <i class="fas fa-plus text-xl"></i>
+        <!-- Floating Action Button -->
+        <button id="fab" class="fixed bottom-24 right-6 md:hidden w-14 h-14 bg-blue-500 text-white rounded-full shadow-lg flex items-center justify-center text-2xl z-40">
+            <i class="fas fa-plus"></i>
         </button>
     </div>
 
     <!-- Modals -->
+    <div id="modalBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+
     <!-- Create Book Modal -->
-    <div id="createBookModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 animate-slide-up">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">নতুন বই তৈরি করুন</h3>
-                    <button class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" onclick="closeModal('createBookModal')">
-                        <i class="fas fa-times"></i>
-                    </button>
+    <div id="createBookModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-md animate-slide-up">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">নতুন বই তৈরি করুন</h3>
+                <button onclick="closeModal('createBookModal')" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="createBookForm">
+                <div class="mb-4">
+                    <label for="newBookName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">বইয়ের নাম</label>
+                    <input type="text" id="newBookName" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" required>
                 </div>
                 
-                <form id="createBookForm">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">বইয়ের নাম</label>
-                        <input type="text" id="newBookName" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" placeholder="যেমন: ব্যক্তিগত খরচ" required>
-                    </div>
-                    
-                    <div class="flex gap-4">
-                        <button type="submit" class="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
-                            তৈরি করুন
-                        </button>
-                        <button type="button" class="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors" onclick="closeModal('createBookModal')">
-                            বাতিল
-                        </button>
-                    </div>
-                </form>
+                <div class="flex justify-end gap-4">
+                    <button type="button" onclick="closeModal('createBookModal')" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">বাতিল</button>
+                    <button type="submit" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">তৈরি করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Move/Copy Modal -->
+    <div id="moveCopyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-md animate-slide-up">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="moveCopyTitle" class="text-lg font-semibold text-gray-800 dark:text-white">এন্ট্রি কপি/মুভ করুন</h3>
+                <button onclick="closeModal('moveCopyModal')" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <label for="destinationBook" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">গন্তব্য বই</label>
+                <select id="destinationBook" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                    <!-- Options will be populated dynamically -->
+                </select>
+            </div>
+            
+            <div class="flex justify-end gap-4">
+                <button type="button" onclick="closeModal('moveCopyModal')" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">বাতিল</button>
+                <button id="confirmMoveCopyBtn" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">নিশ্চিত করুন</button>
             </div>
         </div>
     </div>
 
     <!-- Confirmation Modal -->
-    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 animate-slide-up">
-            <div class="p-6">
-                <div class="flex items-center mb-4">
-                    <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mr-3"></i>
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">নিশ্চিত করুন</h3>
-                </div>
-                
-                <p class="text-gray-600 dark:text-gray-300 mb-6" id="confirmMessage">আপনি কি নিশ্চিত?</p>
-                
-                <div class="flex gap-4">
-                    <button id="confirmYes" class="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
-                        হ্যাঁ
-                    </button>
-                    <button id="confirmNo" class="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
-                        না
-                    </button>
-                </div>
+    <div id="confirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-sm animate-slide-up">
+            <div class="flex items-center mb-4">
+                <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mr-3"></i>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">নিশ্চিত করুন</h3>
+            </div>
+            
+            <p class="text-gray-600 dark:text-gray-300 mb-6" id="confirmMessage">আপনি কি নিশ্চিত?</p>
+            
+            <div class="flex gap-4">
+                <button id="confirmYes" class="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
+                    হ্যাঁ
+                </button>
+                <button id="confirmNo" class="flex-1 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                    না
+                </button>
             </div>
         </div>
     </div>
@@ -950,6 +975,7 @@
         let sortDirection = 'desc';
         let currentPage = 1;
         let entriesPerPage = 25;
+        let actionType = ''; // 'copy' or 'move'
 
         // Categories
         const categories = {
@@ -1275,616 +1301,266 @@
             document.getElementById('selectAllBtn').addEventListener('click', toggleSelectAll);
             document.getElementById('deleteSelectedBtn').addEventListener('click', deleteSelectedEntries);
             document.getElementById('selectAllCheckbox').addEventListener('change', toggleSelectAll);
+            document.getElementById('copySelectedBtn').addEventListener('click', () => openMoveCopyModal('copy'));
+            document.getElementById('moveSelectedBtn').addEventListener('click', () => openMoveCopyModal('move'));
+            document.getElementById('confirmMoveCopyBtn').addEventListener('click', handleMoveCopy);
             
             // Floating action button
             document.getElementById('fab').addEventListener('click', () => {
                 document.getElementById('entryForm').scrollIntoView({ behavior: 'smooth' });
-                document.getElementById('entryAmount').focus();
+                document.getElementById('entryDate').focus();
             });
-            
-            // Pagination controls
-            document.getElementById('prevPageBtn').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderEntries();
-                }
+
+            // Modal close buttons
+            document.querySelectorAll('[onclick^="closeModal"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const modalId = e.currentTarget.getAttribute('onclick').match(/'(.*?)'/)[1];
+                    closeModal(modalId);
+                });
             });
-            
-            document.getElementById('nextPageBtn').addEventListener('click', () => {
-                const bookEntries = getCurrentBookEntries();
-                const filteredEntries = applyCurrentFilters(bookEntries);
-                const totalPages = Math.ceil(filteredEntries.length / entriesPerPage);
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderEntries();
-                }
-            });
-            
-            // Confirmation modal
-            document.getElementById('confirmYes').addEventListener('click', confirmAction);
+
+            // Confirmation modal buttons
             document.getElementById('confirmNo').addEventListener('click', () => closeModal('confirmModal'));
-            
-            // Set default date
-            document.getElementById('entryDate').valueAsDate = new Date();
         }
 
         function initializeApp() {
-            setTimeout(() => {
-                updateBookSelector();
-                updateSummary();
-                renderEntries();
-                showAppContainer();
-            }, 1000);
+            showAppContainer();
+            updateBookOptions();
+            updateCategoryOptions();
+            updateFilterCategoryOptions();
+            applyFilters();
         }
 
-        // Safe localStorage operations
-        function safeGetLocalStorage(key, defaultValue = null) {
-            try {
-                const item = localStorage.getItem(key);
-                return item ? JSON.parse(item) : defaultValue;
-            } catch (error) {
-                console.error(`Error reading from localStorage (${key}):`, error);
-                return defaultValue;
-            }
-        }
-
-        function safeSetLocalStorage(key, value) {
-            try {
-                localStorage.setItem(key, JSON.stringify(value));
-                return true;
-            } catch (error) {
-                console.error(`Error writing to localStorage (${key}):`, error);
-                showToast('স্থানীয় স্টোরেজে সমস্যা হয়েছে', 'warning');
-                return false;
-            }
-        }
-
-        function safeGetStringFromLocalStorage(key, defaultValue = null) {
-            try {
-                return localStorage.getItem(key) || defaultValue;
-            } catch (error) {
-                console.error(`Error reading string from localStorage (${key}):`, error);
-                return defaultValue;
-            }
-        }
-
-        function safeSetStringToLocalStorage(key, value) {
-            try {
-                localStorage.setItem(key, value);
-                return true;
-            } catch (error) {
-                console.error(`Error writing string to localStorage (${key}):`, error);
-                return false;
-            }
-        }
-
-        function updateSyncStatus(status, text) {
-            const syncStatus = document.getElementById('syncStatus');
-            syncStatus.className = `sync-status ${status}`;
+        function updateBookOptions() {
+            const currentBookSelect = document.getElementById('currentBook');
+            currentBookSelect.innerHTML = '';
             
-            const icons = {
-                synced: 'fa-check-circle',
-                syncing: 'fa-sync-alt fa-spin',
-                error: 'fa-exclamation-triangle',
-                offline: 'fa-database'
-            };
-            
-            syncStatus.innerHTML = `
-                <i class="fas ${icons[status]}"></i>
-                <span>${text}</span>
-            `;
-        }
+            if (books.length === 0) {
+                const defaultBook = { id: Date.now().toString(), name: 'ব্যক্তিগত বই', createdAt: new Date().toISOString() };
+                books.push(defaultBook);
+                currentBookId = defaultBook.id;
+                saveUserData();
+            }
 
-        function updateBookSelector() {
-            const selector = document.getElementById('currentBook');
-            selector.innerHTML = '<option value="">বই নির্বাচন করুন</option>';
-            
             books.forEach(book => {
                 const option = document.createElement('option');
                 option.value = book.id;
                 option.textContent = book.name;
-                if (book.id === currentBookId) {
-                    option.selected = true;
-                }
-                selector.appendChild(option);
+                currentBookSelect.appendChild(option);
             });
-            
-            updateCategoryOptions();
+
+            if (currentBookId) {
+                currentBookSelect.value = currentBookId;
+            } else if (books.length > 0) {
+                currentBookId = books[0].id;
+                currentBookSelect.value = currentBookId;
+            }
         }
 
         function switchBook() {
-            const newBookId = document.getElementById('currentBook').value;
-            if (newBookId !== currentBookId) {
-                currentBookId = newBookId;
-                saveUserData();
-                updateSummary();
-                renderEntries();
-                showToast('বই পরিবর্তন করা হয়েছে', 'success');
-            }
+            currentBookId = document.getElementById('currentBook').value;
+            saveUserData();
+            applyFilters();
         }
 
         function handleCreateBook(e) {
             e.preventDefault();
+            const bookNameInput = document.getElementById('newBookName');
+            const bookName = bookNameInput.value.trim();
             
-            const bookName = document.getElementById('newBookName').value.trim();
-            if (!bookName) {
-                showToast('বইয়ের নাম লিখুন', 'error');
-                return;
+            if (bookName) {
+                const newBook = {
+                    id: Date.now().toString(),
+                    name: bookName,
+                    createdAt: new Date().toISOString()
+                };
+                books.push(newBook);
+                currentBookId = newBook.id;
+                saveUserData();
+                updateBookOptions();
+                applyFilters();
+                closeModal('createBookModal');
+                bookNameInput.value = '';
+                showToast('বই সফলভাবে তৈরি হয়েছে', 'success');
+            } else {
+                showToast('বইয়ের নাম লিখুন', 'warning');
             }
-            
-            const newBook = {
-                id: Date.now().toString(),
-                name: bookName,
-                createdAt: new Date().toISOString()
-            };
-            
-            books.push(newBook);
-            currentBookId = newBook.id;
-            saveUserData();
-            updateBookSelector();
-            closeModal('createBookModal');
-            
-            showToast('নতুন বই তৈরি করা হয়েছে', 'success');
-            
-            document.getElementById('newBookName').value = '';
         }
 
         function deleteCurrentBook() {
-            if (!currentBookId) {
-                showToast('কোন বই নির্বাচিত নয়', 'error');
-                return;
-            }
-            
             if (books.length <= 1) {
-                showToast('কমপক্ষে একটি বই থাকতে হবে', 'error');
+                showToast('শেষ বইটি মোছা যাবে না', 'warning');
                 return;
             }
-            
-            const currentBook = books.find(b => b.id === currentBookId);
-            showConfirmModal(
-                `আপনি কি "${currentBook.name}" বইটি মুছে ফেলতে চান? এতে সব এন্ট্রি মুছে যাবে।`,
-                () => {
-                    // Remove book and its entries
-                    books = books.filter(b => b.id !== currentBookId);
-                    entries = entries.filter(e => e.bookId !== currentBookId);
-                    
-                    // Switch to first available book
-                    currentBookId = books[0].id;
-                    
-                    saveUserData();
-                    updateBookSelector();
-                    updateSummary();
-                    renderEntries();
-                    
-                    showToast('বই মুছে ফেলা হয়েছে', 'success');
-                }
-            );
+
+            showConfirmation('আপনি কি এই বইটি এবং এর সব এন্ট্রি মুছে ফেলতে চান?', () => {
+                // Find the book to delete
+                const bookToDeleteIndex = books.findIndex(b => b.id === currentBookId);
+                if (bookToDeleteIndex === -1) return;
+
+                // Remove the book
+                books.splice(bookToDeleteIndex, 1);
+
+                // Remove associated entries
+                entries = entries.filter(entry => entry.bookId !== currentBookId);
+
+                // Switch to the first available book
+                currentBookId = books.length > 0 ? books[0].id : null;
+
+                saveUserData();
+                updateBookOptions();
+                applyFilters();
+                showToast('বই সফলভাবে মোছা হয়েছে', 'success');
+            });
         }
 
         function updateCategoryOptions() {
-            const typeSelect = document.getElementById('entryType');
+            const entryType = document.getElementById('entryType').value;
             const categorySelect = document.getElementById('entryCategory');
-            const filterCategorySelect = document.getElementById('filterCategory');
-            
-            const selectedType = typeSelect.value;
-            
-            // Clear and populate category options
             categorySelect.innerHTML = '<option value="">নির্বাচন করুন</option>';
-            filterCategorySelect.innerHTML = '<option value="">সব</option>';
             
-            if (selectedType && categories[selectedType]) {
-                categories[selectedType].forEach(category => {
+            if (entryType) {
+                categories[entryType].forEach(cat => {
                     const option = document.createElement('option');
-                    option.value = category;
-                    option.textContent = category;
+                    option.value = cat;
+                    option.textContent = cat;
                     categorySelect.appendChild(option);
-                    
-                    const filterOption = option.cloneNode(true);
-                    filterCategorySelect.appendChild(filterOption);
                 });
             }
+        }
+
+        function updateFilterCategoryOptions() {
+            const filterCategorySelect = document.getElementById('filterCategory');
+            filterCategorySelect.innerHTML = '<option value="">সব</option>';
+            
+            const allCategories = [...new Set([...categories.income, ...categories.expense])];
+            allCategories.sort();
+            
+            allCategories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                filterCategorySelect.appendChild(option);
+            });
         }
 
         function handleAddEntry(e) {
             e.preventDefault();
             
+            const date = document.getElementById('entryDate').value;
+            const type = document.getElementById('entryType').value;
+            const amount = parseFloat(document.getElementById('entryAmount').value);
+            const category = document.getElementById('entryCategory').value;
+            const note = document.getElementById('entryNote').value.trim();
+
+            if (!date || !type || !amount || !category) {
+                showToast('সব প্রয়োজনীয় ফিল্ড পূরণ করুন', 'warning');
+                return;
+            }
+
             if (!currentBookId) {
-                showToast('প্রথমে একটি বই নির্বাচন করুন', 'error');
+                showToast('প্রথমে একটি বই তৈরি করুন', 'warning');
                 return;
             }
-            
-            const formData = {
-                date: document.getElementById('entryDate').value,
-                type: document.getElementById('entryType').value,
-                amount: parseFloat(document.getElementById('entryAmount').value),
-                category: document.getElementById('entryCategory').value,
-                note: document.getElementById('entryNote').value.trim()
-            };
-            
-            // Validation
-            if (!formData.date || !formData.type || !formData.amount || !formData.category) {
-                showToast('সব প্রয়োজনীয় ফিল্ড পূরণ করুন', 'error');
-                return;
-            }
-            
-            if (formData.amount <= 0) {
-                showToast('পরিমাণ ০ এর বেশি হতে হবে', 'error');
-                return;
-            }
-            
-            const entry = {
-                id: editingEntryId || Date.now().toString(),
-                bookId: currentBookId,
-                date: formData.date,
-                type: formData.type,
-                amount: formData.amount,
-                category: formData.category,
-                note: formData.note,
-                createdAt: editingEntryId ? entries.find(e => e.id === editingEntryId).createdAt : new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-            
+
             if (editingEntryId) {
                 // Update existing entry
-                const index = entries.findIndex(e => e.id === editingEntryId);
-                entries[index] = entry;
-                showToast('এন্ট্রি আপডেট করা হয়েছে', 'success');
-                cancelEdit();
+                const entryIndex = entries.findIndex(entry => entry.id === editingEntryId);
+                if (entryIndex > -1) {
+                    entries[entryIndex] = {
+                        ...entries[entryIndex],
+                        date,
+                        type,
+                        amount,
+                        category,
+                        note
+                    };
+                    showToast('এন্ট্রি সফলভাবে আপডেট হয়েছে', 'success');
+                }
             } else {
                 // Add new entry
-                entries.push(entry);
-                showToast('নতুন এন্ট্রি যোগ করা হয়েছে', 'success');
+                const newEntry = {
+                    id: Date.now().toString(),
+                    bookId: currentBookId,
+                    date,
+                    type,
+                    amount,
+                    category,
+                    note,
+                    createdAt: new Date().toISOString()
+                };
+                entries.push(newEntry);
+                showToast('এন্ট্রি সফলভাবে যোগ হয়েছে', 'success');
             }
-            
+
             saveUserData();
-            updateSummary();
-            renderEntries();
-            
-            // Reset form
-            document.getElementById('entryForm').reset();
-            document.getElementById('entryDate').valueAsDate = new Date();
+            applyFilters();
+            resetForm();
         }
 
-        function editEntry(entryId) {
-            const entry = entries.find(e => e.id === entryId);
-            if (!entry) return;
-            
-            editingEntryId = entryId;
-            
-            document.getElementById('entryDate').value = entry.date;
-            document.getElementById('entryType').value = entry.type;
-            document.getElementById('entryAmount').value = entry.amount;
-            document.getElementById('entryNote').value = entry.note;
-            
-            // Update category options and set selected
+        function resetForm() {
+            document.getElementById('entryForm').reset();
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+            editingEntryId = null;
             updateCategoryOptions();
-            setTimeout(() => {
-                document.getElementById('entryCategory').value = entry.category;
-            }, 100);
-            
-            document.getElementById('cancelEditBtn').classList.remove('hidden');
-            document.getElementById('entryForm').scrollIntoView({ behavior: 'smooth' });
-            
-            showToast('এন্ট্রি এডিট মোডে', 'info');
         }
 
         function cancelEdit() {
-            editingEntryId = null;
-            document.getElementById('cancelEditBtn').classList.add('hidden');
-            document.getElementById('entryForm').reset();
-            document.getElementById('entryDate').valueAsDate = new Date();
+            resetForm();
+        }
+
+        function editEntry(id) {
+            const entry = entries.find(e => e.id === id);
+            if (!entry) return;
+
+            editingEntryId = id;
+            document.getElementById('entryDate').value = entry.date;
+            document.getElementById('entryType').value = entry.type;
             updateCategoryOptions();
+            document.getElementById('entryCategory').value = entry.category;
+            document.getElementById('entryAmount').value = entry.amount;
+            document.getElementById('entryNote').value = entry.note;
+
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+            document.getElementById('entryForm').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function deleteEntry(entryId) {
-            showConfirmModal(
-                'আপনি কি এই এন্ট্রিটি মুছে ফেলতে চান?',
-                () => {
-                    entries = entries.filter(e => e.id !== entryId);
-                    saveUserData();
-                    updateSummary();
-                    renderEntries();
-                    showToast('এন্ট্রি মুছে ফেলা হয়েছে', 'success');
-                }
-            );
-        }
-
-        function getCurrentBookEntries() {
-            return entries.filter(e => e.bookId === currentBookId);
-        }
-
-        function updateSummary() {
-            const bookEntries = getCurrentBookEntries();
-            
-            let totalIncome = 0;
-            let totalExpense = 0;
-            
-            bookEntries.forEach(entry => {
-                if (entry.type === 'income') {
-                    totalIncome += entry.amount;
-                } else {
-                    totalExpense += entry.amount;
-                }
+        function deleteEntry(id) {
+            showConfirmation('আপনি কি এই এন্ট্রিটি মুছে ফেলতে চান?', () => {
+                entries = entries.filter(entry => entry.id !== id);
+                saveUserData();
+                applyFilters();
+                showToast('এন্ট্রি সফলভাবে মোছা হয়েছে', 'success');
             });
-            
-            const balance = totalIncome - totalExpense;
-            const totalEntries = bookEntries.length;
-            
-            document.getElementById('totalIncome').textContent = formatCurrency(totalIncome);
-            document.getElementById('totalExpense').textContent = formatCurrency(totalExpense);
-            document.getElementById('currentBalance').textContent = formatCurrency(balance);
-            document.getElementById('totalEntries').textContent = totalEntries.toString();
-            
-            // Update balance color
-            const balanceElement = document.getElementById('currentBalance');
-            const balanceCard = balanceElement.closest('.bg-gradient-to-r');
-            
-            if (balance > 0) {
-                balanceCard.className = balanceCard.className.replace(/from-\w+-\d+ to-\w+-\d+/, 'from-green-400 to-green-600');
-            } else if (balance < 0) {
-                balanceCard.className = balanceCard.className.replace(/from-\w+-\d+ to-\w+-\d+/, 'from-red-400 to-red-600');
-            } else {
-                balanceCard.className = balanceCard.className.replace(/from-\w+-\d+ to-\w+-\d+/, 'from-blue-400 to-blue-600');
-            }
         }
 
-        function updateFilteredSummary() {
-            const bookEntries = getCurrentBookEntries();
-            const filteredEntries = applyCurrentFilters(bookEntries);
-            
-            let totalIncome = 0;
-            let totalExpense = 0;
-            
-            filteredEntries.forEach(entry => {
-                if (entry.type === 'income') {
-                    totalIncome += entry.amount;
-                } else {
-                    totalExpense += entry.amount;
-                }
-            });
-            
-            const balance = totalIncome - totalExpense;
-            const summaryBox = document.getElementById('filteredSummary');
-            
-            // Check if any filters are applied
-            const hasFilters = document.getElementById('filterStartDate').value ||
-                              document.getElementById('filterEndDate').value ||
-                              document.getElementById('filterType').value ||
-                              document.getElementById('filterCategory').value ||
-                              document.getElementById('searchBox').value.trim();
-            
-            if (hasFilters && filteredEntries.length !== bookEntries.length) {
-                summaryBox.innerHTML = `
-                    <div class="filtered-summary">
-                        <h4>
-                            <i class="fas fa-filter"></i>
-                            ফিল্টারকৃত ফলাফল (${filteredEntries.length}টি এন্ট্রি)
-                        </h4>
-                        <div class="stats">
-                            <div class="stat-item">
-                                <div class="stat-label">মোট আয়</div>
-                                <div class="stat-value">${formatCurrency(totalIncome)}</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">মোট খরচ</div>
-                                <div class="stat-value">${formatCurrency(totalExpense)}</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-label">ব্যালেন্স</div>
-                                <div class="stat-value ${balance >= 0 ? 'text-green-200' : 'text-red-200'}">${formatCurrency(balance)}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                summaryBox.classList.remove('hidden');
-            } else {
-                summaryBox.classList.add('hidden');
-            }
-        }
+        function applyFilters() {
+            let filteredEntries = entries.filter(entry => entry.bookId === currentBookId);
 
-        function renderEntries() {
-            const bookEntries = getCurrentBookEntries();
-            const filteredEntries = applyCurrentFilters(bookEntries);
-            const sortedEntries = sortEntriesList(filteredEntries, sortColumn, sortDirection);
-            
-            // Calculate pagination
-            const totalEntries = sortedEntries.length;
-            const totalPages = Math.ceil(totalEntries / entriesPerPage);
-            
-            // Ensure current page is valid
-            if (currentPage > totalPages && totalPages > 0) {
-                currentPage = totalPages;
-            } else if (currentPage < 1) {
-                currentPage = 1;
-            }
-            
-            // Get entries for current page
-            const startIndex = (currentPage - 1) * entriesPerPage;
-            const endIndex = startIndex + entriesPerPage;
-            const paginatedEntries = sortedEntries.slice(startIndex, endIndex);
-            
-            const tbody = document.getElementById('entriesTableBody');
-            tbody.innerHTML = '';
-            
-            if (totalEntries === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                            <i class="fas fa-inbox text-4xl mb-4 block"></i>
-                            <p class="text-lg">কোন এন্ট্রি পাওয়া যায়নি</p>
-                            <p class="text-sm">প্রথম এন্ট্রি যোগ করুন</p>
-                        </td>
-                    </tr>
-                `;
-                document.getElementById('entriesCount').textContent = '০টি এন্ট্রি';
-                updatePaginationControls(0, 0, 0);
-                return;
-            }
-            
-            paginatedEntries.forEach(entry => {
-                const date = new Date(entry.date);
-                const dayName = bengaliDays[date.getDay()];
-                const typeClass = entry.type === 'income' ? 'text-green-600 bg-green-100 dark:bg-green-900 dark:text-green-300' : 'text-red-600 bg-red-100 dark:bg-red-900 dark:text-red-300';
-                
-                const row = document.createElement('tr');
-                row.className = 'entry-row hover:bg-gray-50 dark:hover:bg-gray-700 relative';
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap no-print">
-                        <input type="checkbox" class="entry-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" data-entry-id="${entry.id}">
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                        ${formatDate(entry.date)}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        ${dayName}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeClass}">
-                            <i class="fas fa-${entry.type === 'income' ? 'arrow-up' : 'arrow-down'} mr-1"></i>
-                            ${entry.type === 'income' ? 'আয়' : 'খরচ'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${entry.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
-                        ${formatCurrency(entry.amount)}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                        ${entry.category}
-                    </td>
-                    <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate" title="${entry.note}">
-                        ${entry.note || '-'}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium no-print">
-                        <div class="flex space-x-2">
-                            <button onclick="editEntry('${entry.id}')" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button onclick="deleteEntry('${entry.id}')" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-            
-            document.getElementById('entriesCount').textContent = `${totalEntries}টি এন্ট্রি`;
-            
-            // Update pagination controls
-            updatePaginationControls(currentPage, totalPages, totalEntries);
-            
-            // Update filtered summary
-            updateFilteredSummary();
-        }
-
-        function applyCurrentFilters(entries) {
             const startDate = document.getElementById('filterStartDate').value;
             const endDate = document.getElementById('filterEndDate').value;
             const type = document.getElementById('filterType').value;
             const category = document.getElementById('filterCategory').value;
             const searchTerm = document.getElementById('searchBox').value.toLowerCase();
-            
-            return entries.filter(entry => {
-                if (startDate && entry.date < startDate) return false;
-                if (endDate && entry.date > endDate) return false;
-                if (type && entry.type !== type) return false;
-                if (category && entry.category !== category) return false;
-                if (searchTerm && !entry.note.toLowerCase().includes(searchTerm)) return false;
-                return true;
-            });
-        }
 
-        function updatePaginationControls(currentPageNum, totalPages, totalEntries) {
-            const paginationInfo = document.getElementById('paginationInfo');
-            const prevBtn = document.getElementById('prevPageBtn');
-            const nextBtn = document.getElementById('nextPageBtn');
-            const pageNumbers = document.getElementById('pageNumbers');
-            
-            if (totalEntries === 0) {
-                paginationInfo.textContent = 'কোন এন্ট্রি নেই';
-                prevBtn.disabled = true;
-                nextBtn.disabled = true;
-                pageNumbers.innerHTML = '';
-                document.getElementById('paginationControls').style.display = 'none';
-                return;
+            if (startDate) {
+                filteredEntries = filteredEntries.filter(e => e.date >= startDate);
             }
-            
-            document.getElementById('paginationControls').style.display = 'block';
-            
-            // Update pagination info
-            const startEntry = (currentPageNum - 1) * entriesPerPage + 1;
-            const endEntry = Math.min(currentPageNum * entriesPerPage, totalEntries);
-            paginationInfo.textContent = `পৃষ্ঠা ${currentPageNum} এর ${totalPages} (${startEntry}-${endEntry} এর মোট ${totalEntries}টি এন্ট্রি)`;
-            
-            // Update prev/next buttons
-            prevBtn.disabled = currentPageNum <= 1;
-            nextBtn.disabled = currentPageNum >= totalPages;
-            
-            // Generate page numbers
-            pageNumbers.innerHTML = '';
-            
-            // Show page numbers (max 5 visible)
-            let startPage = Math.max(1, currentPageNum - 2);
-            let endPage = Math.min(totalPages, startPage + 4);
-            
-            // Adjust start if we're near the end
-            if (endPage - startPage < 4) {
-                startPage = Math.max(1, endPage - 4);
+            if (endDate) {
+                filteredEntries = filteredEntries.filter(e => e.date <= endDate);
             }
-            
-            // Add first page if not visible
-            if (startPage > 1) {
-                const firstPageBtn = createPageButton(1, currentPageNum);
-                pageNumbers.appendChild(firstPageBtn);
-                
-                if (startPage > 2) {
-                    const dots = document.createElement('span');
-                    dots.textContent = '...';
-                    dots.className = 'px-2 py-1 text-sm text-gray-500';
-                    pageNumbers.appendChild(dots);
-                }
+            if (type) {
+                filteredEntries = filteredEntries.filter(e => e.type === type);
             }
-            
-            // Add visible page numbers
-            for (let i = startPage; i <= endPage; i++) {
-                const pageBtn = createPageButton(i, currentPageNum);
-                pageNumbers.appendChild(pageBtn);
+            if (category) {
+                filteredEntries = filteredEntries.filter(e => e.category === category);
             }
-            
-            // Add last page if not visible
-            if (endPage < totalPages) {
-                if (endPage < totalPages - 1) {
-                    const dots = document.createElement('span');
-                    dots.textContent = '...';
-                    dots.className = 'px-2 py-1 text-sm text-gray-500';
-                    pageNumbers.appendChild(dots);
-                }
-                
-                const lastPageBtn = createPageButton(totalPages, currentPageNum);
-                pageNumbers.appendChild(lastPageBtn);
+            if (searchTerm) {
+                filteredEntries = filteredEntries.filter(e => e.note.toLowerCase().includes(searchTerm));
             }
-        }
 
-        function createPageButton(pageNum, currentPageNum) {
-            const button = document.createElement('button');
-            button.textContent = pageNum;
-            button.className = `px-3 py-1 text-sm rounded transition-colors ${
-                pageNum === currentPageNum 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500'
-            }`;
-            
-            button.addEventListener('click', () => {
-                currentPage = pageNum;
-                renderEntries();
-            });
-            
-            return button;
-        }
-
-        function applyFilters() {
-            currentPage = 1; // Reset to first page when applying filters
-            renderEntries();
+            updateFilteredSummary(filteredEntries);
+            sortAndRenderEntries(filteredEntries);
         }
 
         function clearFilters() {
@@ -1893,193 +1569,377 @@
             document.getElementById('filterType').value = '';
             document.getElementById('filterCategory').value = '';
             document.getElementById('searchBox').value = '';
-            currentPage = 1; // Reset to first page when clearing filters
+            document.getElementById('filteredSummary').classList.add('hidden');
             applyFilters();
         }
 
-        function sortEntriesList(entries, column, direction) {
-            return [...entries].sort((a, b) => {
-                let aVal = a[column];
-                let bVal = b[column];
-                
-                if (column === 'amount') {
-                    aVal = parseFloat(aVal);
-                    bVal = parseFloat(bVal);
-                } else if (column === 'date') {
-                    aVal = new Date(aVal);
-                    bVal = new Date(bVal);
-                }
-                
-                if (aVal < bVal) return direction === 'asc' ? -1 : 1;
-                if (aVal > bVal) return direction === 'asc' ? 1 : -1;
-                return 0;
-            });
+        function updateFilteredSummary(filteredEntries) {
+            const summaryDiv = document.getElementById('filteredSummary');
+            if (filteredEntries.length === entries.filter(e => e.bookId === currentBookId).length) {
+                summaryDiv.classList.add('hidden');
+                return;
+            }
+
+            const totalFilteredIncome = filteredEntries.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
+            const totalFilteredExpense = filteredEntries.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
+            const filteredBalance = totalFilteredIncome - totalFilteredExpense;
+
+            summaryDiv.innerHTML = `
+                <h4 class="font-semibold"><i class="fas fa-info-circle"></i> ফিল্টার করা সারাংশ</h4>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-label">আয়</div>
+                        <div class="stat-value">${formatCurrency(totalFilteredIncome)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">খরচ</div>
+                        <div class="stat-value">${formatCurrency(totalFilteredExpense)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">ব্যালেন্স</div>
+                        <div class="stat-value">${formatCurrency(filteredBalance)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">এন্ট্রি</div>
+                        <div class="stat-value">${filteredEntries.length}</div>
+                    </div>
+                </div>
+            `;
+            summaryDiv.classList.remove('hidden');
         }
 
-        window.sortEntries = function(column) {
+        function sortEntries(column) {
             if (sortColumn === column) {
                 sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
             } else {
                 sortColumn = column;
                 sortDirection = 'desc';
             }
-            currentPage = 1; // Reset to first page when sorting
-            renderEntries();
-        };
+            applyFilters();
+        }
+
+        function sortAndRenderEntries(entriesToSort) {
+            entriesToSort.sort((a, b) => {
+                let valA, valB;
+                if (sortColumn === 'date') {
+                    valA = new Date(a.date);
+                    valB = new Date(b.date);
+                } else if (sortColumn === 'amount') {
+                    valA = a.amount;
+                    valB = b.amount;
+                } else {
+                    valA = a[sortColumn];
+                    valB = b[sortColumn];
+                }
+
+                if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+                if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            renderEntries(entriesToSort);
+        }
+
+        function renderEntries(entriesToRender) {
+            const tableBody = document.getElementById('entriesTableBody');
+            tableBody.innerHTML = '';
+
+            const paginatedEntries = paginate(entriesToRender, currentPage, entriesPerPage);
+
+            if (paginatedEntries.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-12 text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-folder-open text-4xl mb-4"></i>
+                            <p>কোনো এন্ট্রি পাওয়া যায়নি</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                paginatedEntries.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.className = `entry-row ${entry.type === 'income' ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`;
+                    row.dataset.id = entry.id;
+
+                    const entryDate = new Date(entry.date);
+                    const dayOfWeek = bengaliDays[entryDate.getDay()];
+
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 no-print">
+                            <input type="checkbox" class="entry-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" data-id="${entry.id}">
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${entry.date}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${dayOfWeek}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${entry.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                ${entry.type === 'income' ? 'আয়' : 'খরচ'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${entry.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${formatCurrency(entry.amount)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${entry.category}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">${entry.note || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${new Date(entry.createdAt).toLocaleString('bn-BD')}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium no-print">
+                            <button onclick="editEntry('${entry.id}')" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200 mr-3"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteEntry('${entry.id}')" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            updatePaginationControls(entriesToRender.length, currentPage, entriesPerPage);
+            updateOverallStats();
+            document.getElementById('entriesCount').textContent = `${entriesToRender.length}টি এন্ট্রি`;
+            document.getElementById('selectAllCheckbox').checked = false;
+        }
+
+        function updateOverallStats() {
+            const currentBookEntries = entries.filter(e => e.bookId === currentBookId);
+            const totalIncome = currentBookEntries.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
+            const totalExpense = currentBookEntries.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
+            const currentBalance = totalIncome - totalExpense;
+
+            document.getElementById('totalIncome').textContent = formatCurrency(totalIncome);
+            document.getElementById('totalExpense').textContent = formatCurrency(totalExpense);
+            document.getElementById('currentBalance').textContent = formatCurrency(currentBalance);
+            document.getElementById('totalEntries').textContent = currentBookEntries.length;
+        }
+
+        function formatCurrency(amount) {
+            return `${amount.toLocaleString('bn-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ৳`;
+        }
+
+        function paginate(array, page_number, page_size) {
+            return array.slice((page_number - 1) * page_size, page_number * page_size);
+        }
+
+        function updatePaginationControls(totalItems, page, perPage) {
+            const paginationControls = document.getElementById('paginationControls');
+            const pageNumbersContainer = document.getElementById('pageNumbers');
+            const paginationInfo = document.getElementById('paginationInfo');
+            const prevPageBtn = document.getElementById('prevPageBtn');
+            const nextPageBtn = document.getElementById('nextPageBtn');
+
+            const totalPages = Math.ceil(totalItems / perPage);
+
+            if (totalPages <= 1) {
+                paginationControls.classList.add('hidden');
+                return;
+            }
+            paginationControls.classList.remove('hidden');
+
+            paginationInfo.textContent = `পৃষ্ঠা ${page} এর ${totalPages} (মোট ${totalItems}টি এন্ট্রি)`;
+
+            prevPageBtn.disabled = page === 1;
+            nextPageBtn.disabled = page === totalPages;
+
+            prevPageBtn.onclick = () => { currentPage--; applyFilters(); };
+            nextPageBtn.onclick = () => { currentPage++; applyFilters(); };
+
+            pageNumbersContainer.innerHTML = '';
+            // Simplified pagination: show first, last, current, and neighbors
+            const pagesToShow = [...new Set([1, totalPages, page, page - 1, page + 1])]
+                .filter(p => p > 0 && p <= totalPages)
+                .sort((a, b) => a - b);
+
+            let lastPage = 0;
+            pagesToShow.forEach(p => {
+                if (lastPage > 0 && p > lastPage + 1) {
+                    const dots = document.createElement('span');
+                    dots.className = 'px-3 py-1 text-sm text-gray-500';
+                    dots.textContent = '...';
+                    pageNumbersContainer.appendChild(dots);
+                }
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `px-3 py-1 text-sm rounded transition-colors ${p === page ? 'bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-400 text-gray-700'}`;
+                pageBtn.textContent = p;
+                pageBtn.onclick = () => { currentPage = p; applyFilters(); };
+                pageNumbersContainer.appendChild(pageBtn);
+                lastPage = p;
+            });
+        }
 
         function toggleSelectAll() {
             const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-            const entryCheckboxes = document.querySelectorAll('.entry-checkbox');
-            
-            entryCheckboxes.forEach(checkbox => {
-                checkbox.checked = selectAllCheckbox.checked;
+            const isChecked = selectAllCheckbox.checked;
+            document.querySelectorAll('.entry-checkbox').forEach(checkbox => {
+                checkbox.checked = isChecked;
             });
+        }
+
+        function getSelectedEntryIds() {
+            return Array.from(document.querySelectorAll('.entry-checkbox:checked')).map(cb => cb.dataset.id);
         }
 
         function deleteSelectedEntries() {
-            const selectedCheckboxes = document.querySelectorAll('.entry-checkbox:checked');
-            
-            if (selectedCheckboxes.length === 0) {
-                showToast('কোন এন্ট্রি নির্বাচিত নয়', 'warning');
+            const selectedIds = getSelectedEntryIds();
+            if (selectedIds.length === 0) {
+                showToast('কোনো এন্ট্রি নির্বাচন করা হয়নি', 'warning');
                 return;
             }
-            
-            showConfirmModal(
-                `আপনি কি ${selectedCheckboxes.length}টি এন্ট্রি মুছে ফেলতে চান?`,
-                () => {
-                    const idsToDelete = Array.from(selectedCheckboxes).map(cb => cb.dataset.entryId);
-                    entries = entries.filter(entry => !idsToDelete.includes(entry.id));
-                    
-                    saveUserData();
-                    updateSummary();
-                    renderEntries();
-                    
-                    showToast(`${selectedCheckboxes.length}টি এন্ট্রি মুছে ফেলা হয়েছে`, 'success');
-                }
-            );
-        }
 
-        // PDF Export using html2pdf.js
-        function exportToPDF() {
-            const bookEntries = getCurrentBookEntries();
-            const filteredEntries = applyCurrentFilters(bookEntries);
-            
-            if (filteredEntries.length === 0) {
-                showToast('এক্সপোর্ট করার জন্য কোন ডাটা নেই', 'warning');
-                return;
-            }
-            
-            showToast('PDF তৈরি হচ্ছে...', 'info');
-            
-            // Calculate totals
-            let totalIncome = 0;
-            let totalExpense = 0;
-            
-            filteredEntries.forEach(entry => {
-                if (entry.type === 'income') {
-                    totalIncome += entry.amount;
-                } else {
-                    totalExpense += entry.amount;
-                }
+            showConfirmation(`আপনি কি নির্বাচিত ${selectedIds.length}টি এন্ট্রি মুছে ফেলতে চান?`, () => {
+                entries = entries.filter(entry => !selectedIds.includes(entry.id));
+                saveUserData();
+                applyFilters();
+                showToast(`${selectedIds.length}টি এন্ট্রি সফলভাবে মোছা হয়েছে`, 'success');
             });
-            
-            const balance = totalIncome - totalExpense;
-            const currentBook = books.find(b => b.id === currentBookId);
-            
-            // Check if filtered
-            const hasFilters = document.getElementById('filterStartDate').value ||
-                              document.getElementById('filterEndDate').value ||
-                              document.getElementById('filterType').value ||
-                              document.getElementById('filterCategory').value ||
-                              document.getElementById('searchBox').value.trim();
-            
-            // Generate PDF content
-            const pdfContent = generatePDFContent(filteredEntries, totalIncome, totalExpense, balance, currentBook, hasFilters);
-            
-            // Create temporary container for PDF
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = pdfContent;
-            tempDiv.style.position = 'absolute';
-            tempDiv.style.left = '-9999px';
-            tempDiv.style.top = '-9999px';
-            document.body.appendChild(tempDiv);
-            
-            // PDF options
-            const options = {
-                margin: 1,
-                filename: hasFilters ? 
-                    `cashbook-filtered-${new Date().toISOString().split('T')[0]}.pdf` : 
-                    `cashbook-report-${new Date().toISOString().split('T')[0]}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    letterRendering: true
-                },
-                jsPDF: { 
-                    unit: 'in', 
-                    format: 'a4', 
-                    orientation: 'portrait'
-                }
-            };
-            
-            // Generate PDF
-            html2pdf()
-                .set(options)
-                .from(tempDiv)
-                .save()
-                .then(() => {
-                    document.body.removeChild(tempDiv);
-                    showToast('PDF রিপোর্ট ডাউনলোড সম্পন্ন', 'success');
-                })
-                .catch(error => {
-                    console.error('PDF generation error:', error);
-                    document.body.removeChild(tempDiv);
-                    showToast('PDF তৈরি করতে সমস্যা হয়েছে', 'error');
-                });
         }
 
-        function generatePDFContent(entries, totalIncome, totalExpense, balance, currentBook, hasFilters) {
-            const sortedEntries = sortEntriesList(entries, 'date', 'desc');
-            
-            let entriesHTML = '';
-            sortedEntries.forEach(entry => {
-                const date = new Date(entry.date);
-                const dayName = bengaliDays[date.getDay()];
-                const rowClass = entry.type === 'income' ? 'income-row' : 'expense-row';
-                
-                entriesHTML += `
-                    <tr class="${rowClass}">
-                        <td>${formatDate(entry.date)}</td>
-                        <td>${dayName}</td>
+        function openMoveCopyModal(type) {
+            actionType = type;
+            const selectedIds = getSelectedEntryIds();
+            if (selectedIds.length === 0) {
+                showToast('কোনো এন্ট্রি নির্বাচন করা হয়নি', 'warning');
+                return;
+            }
+
+            const destinationBookSelect = document.getElementById('destinationBook');
+            destinationBookSelect.innerHTML = '';
+            books.filter(b => b.id !== currentBookId).forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.id;
+                option.textContent = book.name;
+                destinationBookSelect.appendChild(option);
+            });
+
+            if (destinationBookSelect.options.length === 0) {
+                showToast('অন্য কোনো বই নেই', 'warning');
+                return;
+            }
+
+            document.getElementById('moveCopyTitle').textContent = `এন্ট্রি ${type === 'copy' ? 'কপি' : 'মুভ'} করুন`;
+            openModal('moveCopyModal');
+        }
+
+        function handleMoveCopy() {
+            const selectedIds = getSelectedEntryIds();
+            const destinationBookId = document.getElementById('destinationBook').value;
+
+            if (!destinationBookId) {
+                showToast('গন্তব্য বই নির্বাচন করুন', 'warning');
+                return;
+            }
+
+            if (actionType === 'copy') {
+                selectedIds.forEach(id => {
+                    const entryToCopy = entries.find(e => e.id === id);
+                    if (entryToCopy) {
+                        const newEntry = {
+                            ...entryToCopy,
+                            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                            bookId: destinationBookId,
+                            createdAt: new Date().toISOString()
+                        };
+                        entries.push(newEntry);
+                    }
+                });
+                showToast(`${selectedIds.length}টি এন্ট্রি কপি হয়েছে`, 'success');
+            } else if (actionType === 'move') {
+                entries.forEach(entry => {
+                    if (selectedIds.includes(entry.id)) {
+                        entry.bookId = destinationBookId;
+                    }
+                });
+                showToast(`${selectedIds.length}টি এন্ট্রি মুভ হয়েছে`, 'success');
+            }
+
+            saveUserData();
+            applyFilters();
+            closeModal('moveCopyModal');
+        }
+
+        function exportToCSV() {
+            const filteredEntries = getFilteredEntries();
+            if (filteredEntries.length === 0) {
+                showToast('এক্সপোর্ট করার জন্য কোনো ডেটা নেই', 'warning');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,তারিখ,দিন,ধরন,পরিমাণ,ক্যাটেগরি,নোট\n";
+            filteredEntries.forEach(entry => {
+                const row = [
+                    entry.date,
+                    bengaliDays[new Date(entry.date).getDay()],
+                    entry.type === 'income' ? 'আয়' : 'খরচ',
+                    entry.amount,
+                    entry.category,
+                    `"${entry.note.replace(/"/g, '""')}"`
+                ].join(',');
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `cashbook_${currentBookId}_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function exportToPDF() {
+            const filteredEntries = getFilteredEntries();
+            if (filteredEntries.length === 0) {
+                showToast('পিডিএফ তৈরি করার জন্য কোনো ডেটা নেই', 'warning');
+                return;
+            }
+
+            const reportContainer = document.getElementById('pdfReportContainer');
+            const currentBook = books.find(b => b.id === currentBookId);
+
+            // Filter info
+            const filterStartDate = document.getElementById('filterStartDate').value;
+            const filterEndDate = document.getElementById('filterEndDate').value;
+            const filterType = document.getElementById('filterType').value;
+            const filterCategory = document.getElementById('filterCategory').value;
+            let filterInfoText = 'ফিল্টার: ';
+            if (filterStartDate || filterEndDate || filterType || filterCategory) {
+                if(filterStartDate) filterInfoText += `শুরুর তারিখ: ${filterStartDate}, `;
+                if(filterEndDate) filterInfoText += `শেষের তারিখ: ${filterEndDate}, `;
+                if(filterType) filterInfoText += `ধরন: ${filterType === 'income' ? 'আয়' : 'খরচ'}, `;
+                if(filterCategory) filterInfoText += `ক্যাটেগরি: ${filterCategory}`;
+            } else {
+                filterInfoText += 'কোনো ফিল্টার প্রয়োগ করা হয়নি';
+            }
+
+            // Summary stats
+            const totalIncome = filteredEntries.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
+            const totalExpense = filteredEntries.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
+            const balance = totalIncome - totalExpense;
+
+            let entriesHtml = '';
+            filteredEntries.forEach(entry => {
+                entriesHtml += `
+                    <tr class="${entry.type === 'income' ? 'income-row' : 'expense-row'}">
+                        <td>${entry.date}</td>
+                        <td>${bengaliDays[new Date(entry.date).getDay()]}</td>
                         <td>${entry.type === 'income' ? 'আয়' : 'খরচ'}</td>
-                        <td class="amount-cell">${formatCurrency(entry.amount)}</td>
                         <td>${entry.category}</td>
                         <td>${entry.note || '-'}</td>
+                        <td class="amount-cell">${formatCurrency(entry.amount)}</td>
                     </tr>
                 `;
             });
-            
-            return `
+
+            reportContainer.innerHTML = `
                 <div class="pdf-report">
-                    <h1>💰 আমার ক্যাশবুক রিপোর্ট</h1>
-                    
+                    <h1>ক্যাশবুক রিপোর্ট</h1>
                     <div class="report-header">
-                        <div>তারিখ: ${new Date().toLocaleDateString('bn-BD')}</div>
-                        <div>${currentBook ? `বই: ${currentBook.name}` : ''}</div>
+                        <div><strong>বইয়ের নাম:</strong> ${currentBook.name}</div>
+                        <div><strong>রিপোর্টের তারিখ:</strong> ${new Date().toLocaleDateString('bn-BD')}</div>
                     </div>
-                    
-                    ${hasFilters ? '<div class="filter-info">ফিল্টারকৃত ডাটা</div>' : ''}
+                    <div class="filter-info">${filterInfoText}</div>
                     
                     <div class="summary-section">
-                        <h2>আর্থিক সারাংশ</h2>
+                        <h2>সারাংশ</h2>
                         <table class="summary-table">
                             <thead>
                                 <tr>
                                     <th>মোট আয়</th>
                                     <th>মোট খরচ</th>
-                                    <th>ব্যালেন্স</th>
+                                    <th>বর্তমান ব্যালেন্স</th>
                                     <th>মোট এন্ট্রি</th>
                                 </tr>
                             </thead>
@@ -2087,194 +1947,182 @@
                                 <tr>
                                     <td>${formatCurrency(totalIncome)}</td>
                                     <td>${formatCurrency(totalExpense)}</td>
-                                    <td style="color: ${balance >= 0 ? '#059669' : '#dc2626'}">${formatCurrency(balance)}</td>
-                                    <td>${entries.length}টি</td>
+                                    <td>${formatCurrency(balance)}</td>
+                                    <td>${filteredEntries.length}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <div class="entries-section">
-                        <h2>এন্ট্রি তালিকা</h2>
+                        <h2>বিস্তারিত এন্ট্রি</h2>
                         <table class="entries-table">
                             <thead>
                                 <tr>
                                     <th>তারিখ</th>
                                     <th>দিন</th>
                                     <th>ধরন</th>
-                                    <th>পরিমাণ</th>
                                     <th>ক্যাটেগরি</th>
                                     <th>নোট</th>
+                                    <th class="amount-cell">পরিমাণ</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${entriesHTML}
+                                ${entriesHtml}
                             </tbody>
                         </table>
                     </div>
                 </div>
             `;
+
+            const element = reportContainer.firstElementChild;
+            const opt = {
+                margin:       10,
+                filename:     `cashbook_report_${new Date().toISOString().split('T')[0]}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            html2pdf().from(element).set(opt).save();
         }
 
-        function exportToCSV() {
-            const bookEntries = getCurrentBookEntries();
-            const filteredEntries = applyCurrentFilters(bookEntries);
-            
-            if (filteredEntries.length === 0) {
-                showToast('এক্সপোর্ট করার জন্য কোন ডাটা নেই', 'warning');
-                return;
-            }
-            
-            // Add BOM for proper Bengali encoding
-            const BOM = '\uFEFF';
-            const headers = ['তারিখ', 'ধরন', 'পরিমাণ', 'ক্যাটেগরি', 'নোট'];
-            const csvContent = [
-                headers.join(','),
-                ...filteredEntries.map(entry => [
-                    entry.date,
-                    entry.type === 'income' ? 'আয়' : 'খরচ',
-                    entry.amount,
-                    entry.category,
-                    `"${entry.note || ''}"`
-                ].join(','))
-            ].join('\n');
-            
-            // Check if filtered
-            const hasFilters = document.getElementById('filterStartDate').value ||
-                              document.getElementById('filterEndDate').value ||
-                              document.getElementById('filterType').value ||
-                              document.getElementById('filterCategory').value ||
-                              document.getElementById('searchBox').value.trim();
-            
-            const filename = hasFilters ? 
-                `cashbook-filtered-${new Date().toISOString().split('T')[0]}.csv` : 
-                `cashbook-${new Date().toISOString().split('T')[0]}.csv`;
-            
-            downloadFile(BOM + csvContent, filename, 'text/csv;charset=utf-8');
-            showToast('CSV ফাইল ডাউনলোড হয়েছে', 'success');
+        function getFilteredEntries() {
+            let filteredEntries = entries.filter(entry => entry.bookId === currentBookId);
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+            const type = document.getElementById('filterType').value;
+            const category = document.getElementById('filterCategory').value;
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+
+            if (startDate) filteredEntries = filteredEntries.filter(e => e.date >= startDate);
+            if (endDate) filteredEntries = filteredEntries.filter(e => e.date <= endDate);
+            if (type) filteredEntries = filteredEntries.filter(e => e.type === type);
+            if (category) filteredEntries = filteredEntries.filter(e => e.category === category);
+            if (searchTerm) filteredEntries = filteredEntries.filter(e => e.note.toLowerCase().includes(searchTerm));
+
+            return filteredEntries;
         }
 
-        function downloadFile(content, filename, mimeType) {
-            const blob = new Blob([content], { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+        function showToast(message, type = 'info', duration = 3000) {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, duration);
         }
 
-        // Theme management
-        function loadThemePreference() {
-            const savedTheme = safeGetStringFromLocalStorage('cashbook_theme') || 'light';
-            if (savedTheme === 'dark') {
-                document.documentElement.classList.add('dark');
-            }
-        }
-
-        function toggleTheme() {
-            document.documentElement.classList.toggle('dark');
-            const isDark = document.documentElement.classList.contains('dark');
-            safeSetStringToLocalStorage('cashbook_theme', isDark ? 'dark' : 'light');
-            showToast(`${isDark ? 'ডার্ক' : 'লাইট'} থিম চালু করা হয়েছে`, 'info');
-        }
-
-        // Modal functions
         function openModal(modalId) {
+            document.getElementById('modalBackdrop').classList.remove('hidden');
             document.getElementById(modalId).classList.remove('hidden');
         }
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.add('hidden');
-        }
-
-        function showConfirmModal(message, onConfirm) {
-            document.getElementById('confirmMessage').textContent = message;
-            document.getElementById('confirmYes').onclick = () => {
-                onConfirm();
-                closeModal('confirmModal');
-            };
-            openModal('confirmModal');
-        }
-
-        function confirmAction() {
-            // This will be overridden by showConfirmModal
-        }
-
-        // Toast notifications
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `
-                <i class="fas fa-${getToastIcon(type)} mr-2"></i>
-                ${message}
-            `;
-            
-            document.getElementById('toastContainer').appendChild(toast);
-            
-            // Show toast
-            setTimeout(() => toast.classList.add('show'), 100);
-            
-            // Hide and remove toast
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        function getToastIcon(type) {
-            const icons = {
-                success: 'check-circle',
-                error: 'exclamation-circle',
-                warning: 'exclamation-triangle',
-                info: 'info-circle'
-            };
-            return icons[type] || 'info-circle';
-        }
-
-        // Mobile navigation
-        function scrollToSection(section) {
-            const sections = {
-                summary: document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4'),
-                addEntry: document.getElementById('entryForm'),
-                entries: document.querySelector('.bg-white.dark\\:bg-gray-800.rounded-xl.shadow-lg.overflow-hidden'),
-                export: document.querySelector('.bg-white.dark\\:bg-gray-800.rounded-xl.shadow-lg.p-6.mb-8.no-print')
-            };
-            
-            if (sections[section]) {
-                sections[section].scrollIntoView({ behavior: 'smooth' });
+            if (!document.querySelector('.fixed.inset-0.z-50:not(.hidden)')) {
+                document.getElementById('modalBackdrop').classList.add('hidden');
             }
         }
 
-        // Utility functions
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('bn-BD', {
-                style: 'currency',
-                currency: 'BDT',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            }).format(amount).replace('৳', '') + ' ৳';
-        }
+        function showConfirmation(message, onConfirm) {
+            document.getElementById('confirmMessage').textContent = message;
+            openModal('confirmModal');
 
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('bn-BD', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
+            const confirmYesBtn = document.getElementById('confirmYes');
+            const newConfirmYesBtn = confirmYesBtn.cloneNode(true);
+            confirmYesBtn.parentNode.replaceChild(newConfirmYesBtn, confirmYesBtn);
+
+            newConfirmYesBtn.addEventListener('click', () => {
+                closeModal('confirmModal');
+                onConfirm();
             });
         }
 
-        // Auto-save functionality
-        setInterval(() => {
-            if (currentBookId && currentUser) {
-                saveUserData();
+        function toggleTheme() {
+            const body = document.body;
+            body.classList.toggle('dark');
+            const isDarkMode = body.classList.contains('dark');
+            safeSetLocalStorage('theme', isDarkMode ? 'dark' : 'light');
+            updateThemeIcon(isDarkMode);
+        }
+
+        function loadThemePreference() {
+            const theme = safeGetLocalStorage('theme');
+            const isDarkMode = theme === 'dark';
+            if (isDarkMode) {
+                document.body.classList.add('dark');
             }
-        }, 30000); // Auto-save every 30 seconds
+            updateThemeIcon(isDarkMode);
+        }
+
+        function updateThemeIcon(isDarkMode) {
+            const themeToggle = document.getElementById('themeToggle');
+            if (isDarkMode) {
+                themeToggle.querySelector('.fa-sun').classList.add('hidden');
+                themeToggle.querySelector('.fa-moon').classList.remove('hidden');
+            } else {
+                themeToggle.querySelector('.fa-sun').classList.remove('hidden');
+                themeToggle.querySelector('.fa-moon').classList.add('hidden');
+            }
+        }
+
+        function updateSyncStatus(status, message) {
+            const syncStatusDiv = document.getElementById('syncStatus');
+            syncStatusDiv.className = `sync-status ${status}`;
+            syncStatusDiv.querySelector('span').textContent = message;
+            
+            const icon = syncStatusDiv.querySelector('i');
+            if (status === 'syncing') {
+                icon.className = 'fas fa-sync-alt fa-spin';
+            } else if (status === 'synced') {
+                icon.className = 'fas fa-check-circle';
+            } else if (status === 'error') {
+                icon.className = 'fas fa-exclamation-triangle';
+            } else {
+                icon.className = 'fas fa-database';
+            }
+        }
+
+        function safeSetLocalStorage(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (e) {
+                console.warn('Could not write to localStorage:', e);
+                showToast('লোকাল স্টোরেজে ডেটা সেভ করা যাচ্ছে না। আপনার ব্রাউজার প্রাইভেট মোডে থাকতে পারে।', 'warning', 5000);
+            }
+        }
+
+        function safeGetLocalStorage(key) {
+            try {
+                const item = localStorage.getItem(key);
+                return item ? JSON.parse(item) : null;
+            } catch (e) {
+                console.warn('Could not read from localStorage:', e);
+                return null;
+            }
+        }
+
+        function scrollToSection(section) {
+            let element;
+            if (section === 'summary') element = document.querySelector('.grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4');
+            if (section === 'addEntry') element = document.getElementById('entryForm');
+            if (section === 'entries') element = document.querySelector('.bg-white.dark\:bg-gray-800.rounded-xl.shadow-lg.overflow-hidden');
+            if (section === 'filters') element = document.querySelector('.bg-white.dark\:bg-gray-800.rounded-xl.shadow-lg.p-6.mb-8');
+            
+            if(element) element.scrollIntoView({ behavior: 'smooth' });
+        }
 
     </script>
 </body>
