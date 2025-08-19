@@ -49,11 +49,6 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        .dark .glass-effect {
-            background: rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
         .toast {
             position: fixed;
             top: 20px;
@@ -103,11 +98,6 @@
                 background: white;
                 border-top: 1px solid #e5e7eb;
                 z-index: 1000;
-            }
-            
-            .dark .mobile-nav {
-                background: #1f2937;
-                border-top-color: #374151;
             }
         }
         
@@ -313,17 +303,19 @@
         }
 
         .filtered-summary {
-            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            padding: 1rem;
-            border-radius: 0.75rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .filtered-summary h4 {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -331,27 +323,99 @@
 
         .filtered-summary .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 0.75rem;
-            margin-top: 0.75rem;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
         }
 
         .filtered-summary .stat-item {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.5rem;
-            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 1rem;
+            border-radius: 0.75rem;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
         }
 
         .filtered-summary .stat-label {
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             opacity: 0.9;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
         }
 
         .filtered-summary .stat-value {
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* Enhanced filter results styling */
+        .filter-results-enhanced {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .filter-results-enhanced .filter-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .filter-results-enhanced .filter-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-results-enhanced .filter-stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .filter-results-enhanced .filter-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .filter-results-enhanced .filter-stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+
+        .filter-results-enhanced .filter-stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .filter-results-enhanced .filter-stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .filter-results-enhanced .filter-info-bar {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+            border-left: 4px solid rgba(255, 255, 255, 0.4);
         }
 
         /* PDF Report Styles */
@@ -451,10 +515,24 @@
         .pdf-report .expense-row {
             background-color: #fef2f2;
         }
+
+        /* Auto-filled date field styling */
+        .auto-filled-date {
+            background-color: #f0f9ff;
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+
+        .date-auto-info {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+            font-style: italic;
+        }
     </style>
     
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+<body class="bg-gray-100 transition-colors duration-300">
     <!-- Login Section -->
     <div id="loginSection" class="login-container">
         <div class="login-card">
@@ -518,32 +596,32 @@
     </div>
 
     <!-- Loading Screen -->
-    <div id="loadingScreen" class="fixed inset-0 bg-white dark:bg-gray-900 z-50 flex items-center justify-center hidden">
+    <div id="loadingScreen" class="fixed inset-0 bg-white z-50 flex items-center justify-center hidden">
         <div class="text-center">
             <div class="loading-spinner mx-auto mb-4"></div>
-            <p class="text-lg text-gray-600 dark:text-gray-300">ডাটা লোড হচ্ছে...</p>
+            <p class="text-lg text-gray-600">ডাটা লোড হচ্ছে...</p>
         </div>
     </div>
 
     <!-- Main App Container -->
     <div id="appContainer" class="min-h-screen pb-20 md:pb-0 hidden">
         <!-- Header -->
-        <header class="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-30">
+        <header class="bg-white shadow-lg sticky top-0 z-30">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center py-4">
                     <div class="flex items-center">
                         <i class="fas fa-wallet text-3xl text-blue-500 mr-3"></i>
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">💰 আমার ক্যাশবুক</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">আপনার আর্থিক হিসাব রাখুন</p>
+                            <h1 class="text-2xl font-bold text-gray-900">💰 আমার ক্যাশবুক</h1>
+                            <p class="text-sm text-gray-500">আপনার আর্থিক হিসাব রাখুন</p>
                         </div>
                     </div>
                     
                     <div class="flex items-center space-x-4">
                         <!-- User Info -->
                         <div class="flex items-center space-x-2">
-                            <span id="userEmail" class="text-sm text-gray-600 dark:text-gray-300"></span>
-                            <button id="logoutBtn" class="text-sm text-red-600 hover:text-red-800 dark:text-red-400">
+                            <span id="userEmail" class="text-sm text-gray-600"></span>
+                            <button id="logoutBtn" class="text-sm text-red-600 hover:text-red-800">
                                 <i class="fas fa-sign-out-alt mr-1"></i>লগআউট
                             </button>
                         </div>
@@ -553,12 +631,6 @@
                             <i class="fas fa-database"></i>
                             <span>স্থানীয় সংরক্ষিত</span>
                         </div>
-                        
-                        <!-- Theme Toggle -->
-                        <button id="themeToggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                            <i class="fas fa-sun dark:hidden"></i>
-                            <i class="fas fa-moon hidden dark:inline"></i>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -610,13 +682,13 @@
             </div>
 
             <!-- Book Management -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
                     <i class="fas fa-book mr-2"></i>বই ব্যবস্থাপনা
                 </h3>
                 
                 <div class="flex flex-col md:flex-row gap-4 mb-6">
-                    <select id="currentBook" class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                    <select id="currentBook" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         <option value="">বই নির্বাচন করুন</option>
                     </select>
                     
@@ -632,20 +704,21 @@
             </div>
 
             <!-- Add Entry Form -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-6">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-6">
                     <i class="fas fa-plus-circle mr-2"></i>নতুন এন্ট্রি যোগ করুন
                 </h3>
                 
                 <form id="entryForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">তারিখ</label>
-                        <input type="date" id="entryDate" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">তারিখ (অটোমেটিক)</label>
+                        <input type="date" id="entryDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 auto-filled-date" required readonly>
+                        <div class="date-auto-info">আজকের তারিখ স্বয়ংক্রিয়ভাবে সেট হয়েছে</div>
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ধরন</label>
-                        <select id="entryType" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">ধরন</label>
+                        <select id="entryType" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
                             <option value="">নির্বাচন করুন</option>
                             <option value="income">আয়</option>
                             <option value="expense">খরচ</option>
@@ -653,20 +726,20 @@
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">পরিমাণ (৳)</label>
-                        <input type="number" id="entryAmount" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" placeholder="০" min="0" step="0.01" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">পরিমাণ (৳)</label>
+                        <input type="number" id="entryAmount" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="০" min="0" step="0.01" required>
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ক্যাটেগরি</label>
-                        <select id="entryCategory" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" required>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">ক্যাটেগরি</label>
+                        <select id="entryCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
                             <option value="">নির্বাচন করুন</option>
                         </select>
                     </div>
                     
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">নোট</label>
-                        <input type="text" id="entryNote" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" placeholder="বিস্তারিত লিখুন (ঐচ্ছিক)">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">নোট</label>
+                        <input type="text" id="entryNote" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="বিস্তারিত লিখুন (ঐচ্ছিক)">
                     </div>
                     
                     <div class="md:col-span-3">
@@ -683,28 +756,28 @@
             </div>
 
             <!-- Filters and Search -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
                     <i class="fas fa-filter mr-2"></i>ফিল্টার ও সার্চ
                 </h3>
 
-                <!-- Filtered Summary -->
+                <!-- Enhanced Filtered Summary -->
                 <div id="filteredSummary" class="hidden"></div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">শুরুর তারিখ</label>
-                        <input type="date" id="filterStartDate" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">শুরুর তারিখ</label>
+                        <input type="date" id="filterStartDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">শেষের তারিখ</label>
-                        <input type="date" id="filterEndDate" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">শেষের তারিখ</label>
+                        <input type="date" id="filterEndDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ধরন</label>
-                        <select id="filterType" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">ধরন</label>
+                        <select id="filterType" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                             <option value="">সব</option>
                             <option value="income">আয়</option>
                             <option value="expense">খরচ</option>
@@ -712,8 +785,8 @@
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ক্যাটেগরি</label>
-                        <select id="filterCategory" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">ক্যাটেগরি</label>
+                        <select id="filterCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                             <option value="">সব</option>
                         </select>
                     </div>
@@ -721,7 +794,7 @@
                 
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="flex-1">
-                        <input type="text" id="searchBox" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" placeholder="নোটে সার্চ করুন...">
+                        <input type="text" id="searchBox" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="নোটে সার্চ করুন...">
                     </div>
                     
                     <div class="flex gap-2">
@@ -736,8 +809,8 @@
             </div>
 
             <!-- Export Options -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 no-print">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8 no-print">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
                     <i class="fas fa-download mr-2"></i>এক্সপোর্ট অপশন
                 </h3>
                 
@@ -752,15 +825,15 @@
             </div>
 
             <!-- Entries Table -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="p-6 border-b border-gray-200">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                        <h3 class="text-lg font-semibold text-gray-800">
                             <i class="fas fa-list mr-2"></i>সব এন্ট্রি
                         </h3>
                         
                         <div class="flex items-center gap-4">
-                            <span class="text-sm text-gray-500 dark:text-gray-400" id="entriesCount">০টি এন্ট্রি</span>
+                            <span class="text-sm text-gray-500" id="entriesCount">০টি এন্ট্রি</span>
                             
                             <div class="flex gap-2 no-print">
                                 <button id="selectAllBtn" class="px-3 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors">
@@ -781,48 +854,48 @@
                 </div>
                 
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider no-print">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider no-print">
                                     <input type="checkbox" id="selectAllCheckbox" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600" onclick="sortEntries('date')">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onclick="sortEntries('date')">
                                     তারিখ <i class="fas fa-sort ml-1"></i>
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     দিন
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600" onclick="sortEntries('type')">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onclick="sortEntries('type')">
                                     ধরন <i class="fas fa-sort ml-1"></i>
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600" onclick="sortEntries('amount')">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100" onclick="sortEntries('amount')">
                                     পরিমাণ <i class="fas fa-sort ml-1"></i>
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     ক্যাটেগরি
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     নোট
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                    এন্ট্রির সময়
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    এন্ট্রির সময়
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider no-print">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider no-print">
                                     অ্যাকশন
                                 </th>
                             </tr>
                         </thead>
-                        <tbody id="entriesTableBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody id="entriesTableBody" class="bg-white divide-y divide-gray-200">
                             <!-- Entries will be dynamically inserted here -->
                         </tbody>
                     </table>
                 </div>
                 
                 <!-- Pagination Controls -->
-                <div id="paginationControls" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+                <div id="paginationControls" class="px-6 py-4 border-t border-gray-200 bg-gray-50">
                     <div class="flex items-center justify-between">
-                        <div class="text-sm text-gray-700 dark:text-gray-300">
+                        <div class="text-sm text-gray-700">
                             <span id="paginationInfo">পৃষ্ঠা ১ এর ১ (মোট ০টি এন্ট্রি)</span>
                         </div>
                         <div class="flex items-center space-x-2">
@@ -844,19 +917,19 @@
         <!-- Mobile Navigation -->
         <nav class="mobile-nav md:hidden">
             <div class="flex justify-around items-center py-2">
-                <button class="flex flex-col items-center py-2 px-4 text-gray-600 dark:text-gray-300" onclick="scrollToSection('summary')">
+                <button class="flex flex-col items-center py-2 px-4 text-gray-600" onclick="scrollToSection('summary')">
                     <i class="fas fa-chart-bar text-lg"></i>
                     <span class="text-xs mt-1">সারাংশ</span>
                 </button>
-                <button class="flex flex-col items-center py-2 px-4 text-gray-600 dark:text-gray-300" onclick="scrollToSection('addEntry')">
+                <button class="flex flex-col items-center py-2 px-4 text-gray-600" onclick="scrollToSection('addEntry')">
                     <i class="fas fa-plus-circle text-lg"></i>
                     <span class="text-xs mt-1">যোগ করুন</span>
                 </button>
-                <button class="flex flex-col items-center py-2 px-4 text-gray-600 dark:text-gray-300" onclick="scrollToSection('entries')">
+                <button class="flex flex-col items-center py-2 px-4 text-gray-600" onclick="scrollToSection('entries')">
                     <i class="fas fa-list text-lg"></i>
                     <span class="text-xs mt-1">এন্ট্রি</span>
                 </button>
-                <button class="flex flex-col items-center py-2 px-4 text-gray-600 dark:text-gray-300" onclick="scrollToSection('filters')">
+                <button class="flex flex-col items-center py-2 px-4 text-gray-600" onclick="scrollToSection('filters')">
                     <i class="fas fa-filter text-lg"></i>
                     <span class="text-xs mt-1">ফিল্টার</span>
                 </button>
@@ -874,18 +947,18 @@
 
     <!-- Create Book Modal -->
     <div id="createBookModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-md animate-slide-up">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md animate-slide-up">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">নতুন বই তৈরি করুন</h3>
-                <button onclick="closeModal('createBookModal')" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">নতুন বই তৈরি করুন</h3>
+                <button onclick="closeModal('createBookModal')" class="text-gray-500 hover:text-gray-700">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
             
             <form id="createBookForm">
                 <div class="mb-4">
-                    <label for="newBookName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">বইয়ের নাম</label>
-                    <input type="text" id="newBookName" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" required>
+                    <label for="newBookName" class="block text-sm font-medium text-gray-700 mb-2">বইয়ের নাম</label>
+                    <input type="text" id="newBookName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
                 </div>
                 
                 <div class="flex justify-end gap-4">
@@ -898,17 +971,17 @@
 
     <!-- Move/Copy Modal -->
     <div id="moveCopyModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-md animate-slide-up">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md animate-slide-up">
             <div class="flex justify-between items-center mb-4">
-                <h3 id="moveCopyTitle" class="text-lg font-semibold text-gray-800 dark:text-white">এন্ট্রি কপি/মুভ করুন</h3>
-                <button onclick="closeModal('moveCopyModal')" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <h3 id="moveCopyTitle" class="text-lg font-semibold text-gray-800">এন্ট্রি কপি/মুভ করুন</h3>
+                <button onclick="closeModal('moveCopyModal')" class="text-gray-500 hover:text-gray-700">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
             
             <div class="mb-4">
-                <label for="destinationBook" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">গন্তব্য বই</label>
-                <select id="destinationBook" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                <label for="destinationBook" class="block text-sm font-medium text-gray-700 mb-2">গন্তব্য বই</label>
+                <select id="destinationBook" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     <!-- Options will be populated dynamically -->
                 </select>
             </div>
@@ -922,13 +995,13 @@
 
     <!-- Confirmation Modal -->
     <div id="confirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 w-full max-w-sm animate-slide-up">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm animate-slide-up">
             <div class="flex items-center mb-4">
                 <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mr-3"></i>
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">নিশ্চিত করুন</h3>
+                <h3 class="text-lg font-semibold text-gray-800">নিশ্চিত করুন</h3>
             </div>
             
-            <p class="text-gray-600 dark:text-gray-300 mb-6" id="confirmMessage">আপনি কি নিশ্চিত?</p>
+            <p class="text-gray-600 mb-6" id="confirmMessage">আপনি কি নিশ্চিত?</p>
             
             <div class="flex gap-4">
                 <button id="confirmYes" class="flex-1 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
@@ -991,7 +1064,7 @@
             initializeFirebase();
             setupAuthListeners();
             setupEventListeners();
-            loadThemePreference();
+            setTodayDate(); // Auto-set today's date
         });
 
         function initializeFirebase() {
@@ -1269,9 +1342,6 @@
         }
 
         function setupEventListeners() {
-            // Theme toggle
-            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-            
             // Entry form
             document.getElementById('entryForm').addEventListener('submit', handleAddEntry);
             document.getElementById('entryType').addEventListener('change', updateCategoryOptions);
@@ -1308,7 +1378,7 @@
             // Floating action button
             document.getElementById('fab').addEventListener('click', () => {
                 document.getElementById('entryForm').scrollIntoView({ behavior: 'smooth' });
-                document.getElementById('entryDate').focus();
+                document.getElementById('entryAmount').focus();
             });
 
             // Modal close buttons
@@ -1323,11 +1393,18 @@
             document.getElementById('confirmNo').addEventListener('click', () => closeModal('confirmModal'));
         }
 
+        function setTodayDate() {
+            const today = new Date();
+            const todayString = today.toISOString().split('T')[0];
+            document.getElementById('entryDate').value = todayString;
+        }
+
         function initializeApp() {
             showAppContainer();
             updateBookOptions();
             updateCategoryOptions();
             updateFilterCategoryOptions();
+            setTodayDate(); // Set today's date when app initializes
             applyFilters();
         }
 
@@ -1383,7 +1460,7 @@
                 bookNameInput.value = '';
                 showToast('বই সফলভাবে তৈরি হয়েছে', 'success');
             } else {
-                showToast('বইয়ের নাম লিখুন', 'warning');
+                showToast('বইয়ের নাম লিখুন', 'warning');
             }
         }
 
@@ -1500,6 +1577,7 @@
 
         function resetForm() {
             document.getElementById('entryForm').reset();
+            setTodayDate(); // Reset to today's date after form reset
             document.getElementById('cancelEditBtn').classList.add('hidden');
             editingEntryId = null;
             updateCategoryOptions();
@@ -1583,26 +1661,62 @@
             const totalFilteredIncome = filteredEntries.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
             const totalFilteredExpense = filteredEntries.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
             const filteredBalance = totalFilteredIncome - totalFilteredExpense;
+            
+            // Create filter info
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+            const type = document.getElementById('filterType').value;
+            const category = document.getElementById('filterCategory').value;
+            const searchTerm = document.getElementById('searchBox').value;
+            
+            let filterInfoText = 'প্রয়োগকৃত ফিল্টার: ';
+            const filterParts = [];
+            if(startDate) filterParts.push(`শুরু: ${startDate}`);
+            if(endDate) filterParts.push(`শেষ: ${endDate}`);
+            if(type) filterParts.push(`ধরন: ${type === 'income' ? 'আয়' : 'খরচ'}`);
+            if(category) filterParts.push(`ক্যাটেগরি: ${category}`);
+            if(searchTerm) filterParts.push(`সার্চ: "${searchTerm}"`);
+            
+            filterInfoText += filterParts.length > 0 ? filterParts.join(', ') : 'কাস্টম নির্বাচন';
 
+            summaryDiv.className = 'filter-results-enhanced';
             summaryDiv.innerHTML = `
-                <h4 class="font-semibold"><i class="fas fa-info-circle"></i> ফিল্টার করা সারাংশ</h4>
-                <div class="stats">
-                    <div class="stat-item">
-                        <div class="stat-label">আয়</div>
-                        <div class="stat-value">${formatCurrency(totalFilteredIncome)}</div>
+                <div class="filter-title">
+                    <i class="fas fa-filter"></i>
+                    ফিল্টার করা ফলাফলের সারাংশ
+                </div>
+                <div class="filter-stats-grid">
+                    <div class="filter-stat-card">
+                        <div class="filter-stat-icon">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div class="filter-stat-label">মোট আয়</div>
+                        <div class="filter-stat-value">${formatCurrency(totalFilteredIncome)}</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">খরচ</div>
-                        <div class="stat-value">${formatCurrency(totalFilteredExpense)}</div>
+                    <div class="filter-stat-card">
+                        <div class="filter-stat-icon">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div class="filter-stat-label">মোট খরচ</div>
+                        <div class="filter-stat-value">${formatCurrency(totalFilteredExpense)}</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">ব্যালেন্স</div>
-                        <div class="stat-value">${formatCurrency(filteredBalance)}</div>
+                    <div class="filter-stat-card">
+                        <div class="filter-stat-icon">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <div class="filter-stat-label">নিট ব্যালেন্স</div>
+                        <div class="filter-stat-value ${filteredBalance >= 0 ? 'text-green-200' : 'text-red-200'}">${formatCurrency(filteredBalance)}</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">এন্ট্রি</div>
-                        <div class="stat-value">${filteredEntries.length}</div>
+                    <div class="filter-stat-card">
+                        <div class="filter-stat-icon">
+                            <i class="fas fa-list-ol"></i>
+                        </div>
+                        <div class="filter-stat-label">পাওয়া এন্ট্রি</div>
+                        <div class="filter-stat-value">${filteredEntries.length}টি</div>
                     </div>
+                </div>
+                <div class="filter-info-bar">
+                    <i class="fas fa-info-circle"></i> ${filterInfoText}
                 </div>
             `;
             summaryDiv.classList.remove('hidden');
@@ -1649,7 +1763,7 @@
             if (paginatedEntries.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="9" class="text-center py-12 text-gray-500 dark:text-gray-400">
+                        <td colspan="9" class="text-center py-12 text-gray-500">
                             <i class="fas fa-folder-open text-4xl mb-4"></i>
                             <p>কোনো এন্ট্রি পাওয়া যায়নি</p>
                         </td>
@@ -1658,30 +1772,30 @@
             } else {
                 paginatedEntries.forEach(entry => {
                     const row = document.createElement('tr');
-                    row.className = `entry-row ${entry.type === 'income' ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'} hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors`;
+                    row.className = `entry-row ${entry.type === 'income' ? 'bg-green-50' : 'bg-red-50'} hover:bg-gray-100 transition-colors`;
                     row.dataset.id = entry.id;
 
                     const entryDate = new Date(entry.date);
                     const dayOfWeek = bengaliDays[entryDate.getDay()];
 
                     row.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 no-print">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 no-print">
                             <input type="checkbox" class="entry-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" data-id="${entry.id}">
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${entry.date}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${dayOfWeek}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${entry.date}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dayOfWeek}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${entry.type === 'income' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
                                 ${entry.type === 'income' ? 'আয়' : 'খরচ'}
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${entry.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">${formatCurrency(entry.amount)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${entry.category}</td>
-                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">${entry.note || '-'}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${new Date(entry.createdAt).toLocaleString('bn-BD')}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold ${entry.type === 'income' ? 'text-green-600' : 'text-red-600'}">${formatCurrency(entry.amount)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${entry.category}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${entry.note || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(entry.createdAt).toLocaleString('bn-BD')}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium no-print">
-                            <button onclick="editEntry('${entry.id}')" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-200 mr-3"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteEntry('${entry.id}')" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-200"><i class="fas fa-trash"></i></button>
+                            <button onclick="editEntry('${entry.id}')" class="text-blue-600 hover:text-blue-900 mr-3"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteEntry('${entry.id}')" class="text-red-600 hover:text-red-900"><i class="fas fa-trash"></i></button>
                         </td>
                     `;
                     tableBody.appendChild(row);
@@ -1927,7 +2041,7 @@
                 <div class="pdf-report">
                     <h1>ক্যাশবুক রিপোর্ট</h1>
                     <div class="report-header">
-                        <div><strong>বইয়ের নাম:</strong> ${currentBook.name}</div>
+                        <div><strong>বইয়ের নাম:</strong> ${currentBook.name}</div>
                         <div><strong>রিপোর্টের তারিখ:</strong> ${new Date().toLocaleDateString('bn-BD')}</div>
                     </div>
                     <div class="filter-info">${filterInfoText}</div>
@@ -2050,34 +2164,6 @@
             });
         }
 
-        function toggleTheme() {
-            const body = document.body;
-            body.classList.toggle('dark');
-            const isDarkMode = body.classList.contains('dark');
-            safeSetLocalStorage('theme', isDarkMode ? 'dark' : 'light');
-            updateThemeIcon(isDarkMode);
-        }
-
-        function loadThemePreference() {
-            const theme = safeGetLocalStorage('theme');
-            const isDarkMode = theme === 'dark';
-            if (isDarkMode) {
-                document.body.classList.add('dark');
-            }
-            updateThemeIcon(isDarkMode);
-        }
-
-        function updateThemeIcon(isDarkMode) {
-            const themeToggle = document.getElementById('themeToggle');
-            if (isDarkMode) {
-                themeToggle.querySelector('.fa-sun').classList.add('hidden');
-                themeToggle.querySelector('.fa-moon').classList.remove('hidden');
-            } else {
-                themeToggle.querySelector('.fa-sun').classList.remove('hidden');
-                themeToggle.querySelector('.fa-moon').classList.add('hidden');
-            }
-        }
-
         function updateSyncStatus(status, message) {
             const syncStatusDiv = document.getElementById('syncStatus');
             syncStatusDiv.className = `sync-status ${status}`;
@@ -2118,8 +2204,8 @@
             let element;
             if (section === 'summary') element = document.querySelector('.grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4');
             if (section === 'addEntry') element = document.getElementById('entryForm');
-            if (section === 'entries') element = document.querySelector('.bg-white.dark\:bg-gray-800.rounded-xl.shadow-lg.overflow-hidden');
-            if (section === 'filters') element = document.querySelector('.bg-white.dark\:bg-gray-800.rounded-xl.shadow-lg.p-6.mb-8');
+            if (section === 'entries') element = document.querySelector('.bg-white.rounded-xl.shadow-lg.overflow-hidden');
+            if (section === 'filters') element = document.querySelector('.bg-white.rounded-xl.shadow-lg.p-6.mb-8');
             
             if(element) element.scrollIntoView({ behavior: 'smooth' });
         }
