@@ -1837,7 +1837,12 @@
         }
 
         function formatCurrency(amount) {
-            return `${amount.toLocaleString('bn-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ৳`;
+            // Check if the amount is a whole number
+            if (amount % 1 === 0) {
+                return `${amount.toLocaleString('bn-BD', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ৳`;
+            } else {
+                return `${amount.toLocaleString('bn-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ৳`;
+            }
         }
 
         function paginate(array, page_number, page_size) {
